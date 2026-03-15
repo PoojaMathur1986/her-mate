@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
+import { useAuth } from "@/app/lib/AuthContext";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -280,9 +283,12 @@ function BottomNav({ activeHref }: { activeHref: string }) {
 
 // ─── Page ────────────────────────────────────────────────────────────────────
 
-export default function HomePage() {
+function HomePageContent() {
+  const { user, signOut } = useAuth();
+  const router = useRouter();
   const [selectedMood, setSelectedMood] = useState<MoodKey | null>("okay");
   const [moodLogged, setMoodLogged] = useState(false);
+  const [isSigningOut, setIsSigningOut] = useState(false);
 
   const currentHour = new Date().getHours();
   const greeting =
@@ -292,9 +298,18 @@ export default function HomePage() {
         ? "Good afternoon"
         : "Good evening";
 
-  // Replace with real user name from session/db
-  const userName = "Priya";
   const streakDays = 7;
+
+  async function handleSignOut() {
+    setIsSigningOut(true);
+    try {
+      await signOut();
+      router.push("/login");
+    } catch (error) {
+      console.error("Sign out failed:", error);
+      setIsSigningOut(false);
+    }
+  }
 
   function handleMoodLog() {
     if (!selectedMood) return;
@@ -343,13 +358,15 @@ export default function HomePage() {
                 feeling today?
               </h1>
             </div>
-            <Link
-              href="/profile"
-              className="w-10 h-10 rounded-full bg-[var(--color-bloom-rose-200)] flex items-center justify-center text-sm font-medium text-[var(--color-bloom-rose-800)] shrink-0 ml-3 mt-1 border border-[var(--color-border-soft)]"
-              aria-label="Profile"
+            <button
+              onClick={handleSignOut}
+              disabled={isSigningOut}
+              className="w-10 h-10 rounded-full bg-[var(--color-bloom-rose-200)] flex items-center justify-center text-lg font-medium text-[var(--color-bloom-rose-800)] shrink-0 ml-3 mt-1 border border-[var(--color-border-soft)] hover:bg-[var(--color-bloom-rose-300)] transition-colors disabled:opacity-50"
+              aria-label="Sign out"
+              title={`Signed in as ${user?.email}`}
             >
-              {userName.charAt(0)}
-            </Link>
+              {isSigningOut ? "…" : "↪️"}
+            </button>
           </div>
 
           <div className="mt-3">
@@ -496,5 +513,13 @@ export default function HomePage() {
       {/* ── Bottom navigation ── */}
       <BottomNav activeHref="/" />
     </div>
+  );
+}
+
+export default function HomePage() {
+  return (
+    <ProtectedRoute>
+      <HomePageContent />
+    </ProtectedRoute>
   );
 }
