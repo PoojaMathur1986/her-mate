@@ -8,16 +8,6 @@ import { useAuth } from "@/app/lib/AuthContext";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
-type MoodKey = "heavy" | "meh" | "okay" | "good" | "bright";
-
-interface Mood {
-  key: MoodKey;
-  emoji: string;
-  label: string;
-  color: string; // ring / selected bg
-  textColor: string;
-}
-
 interface QuickTile {
   href: string;
   icon: string;
@@ -35,49 +25,6 @@ interface MemoryEntry {
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
-
-const MOODS: Mood[] = [
-  {
-    key: "heavy",
-    emoji: "🌧️",
-    label: "Heavy",
-    color:
-      "bg-[var(--color-bloom-midnight-100)] ring-[var(--color-bloom-midnight-300)]",
-    textColor: "text-[var(--color-bloom-midnight-600)]"
-  },
-  {
-    key: "meh",
-    emoji: "😶",
-    label: "Meh",
-    color:
-      "bg-[var(--color-bloom-blush-100)]    ring-[var(--color-bloom-blush-400)]",
-    textColor: "text-[var(--color-bloom-blush-700)]"
-  },
-  {
-    key: "okay",
-    emoji: "🌿",
-    label: "Okay",
-    color:
-      "bg-[var(--color-bloom-sage-100)]     ring-[var(--color-bloom-sage-400)]",
-    textColor: "text-[var(--color-bloom-sage-700)]"
-  },
-  {
-    key: "good",
-    emoji: "🌸",
-    label: "Good",
-    color:
-      "bg-[var(--color-bloom-rose-100)]     ring-[var(--color-bloom-rose-400)]",
-    textColor: "text-[var(--color-bloom-rose-700)]"
-  },
-  {
-    key: "bright",
-    emoji: "✨",
-    label: "Bright",
-    color:
-      "bg-[var(--color-bloom-honey-100)]    ring-[var(--color-bloom-honey-400)]",
-    textColor: "text-[var(--color-bloom-honey-700)]"
-  }
-];
 
 const QUICK_TILES: QuickTile[] = [
   {
@@ -138,39 +85,6 @@ const NAV_ITEMS = [
 ];
 
 // ─── Subcomponents ───────────────────────────────────────────────────────────
-
-function MoodButton({
-  mood,
-  selected,
-  onSelect
-}: {
-  mood: Mood;
-  selected: boolean;
-  onSelect: (key: MoodKey) => void;
-}) {
-  return (
-    <button
-      onClick={() => onSelect(mood.key)}
-      aria-label={`Mood: ${mood.label}`}
-      className={`
-        flex flex-col items-center gap-1.5 px-3 py-2.5 rounded-2xl
-        transition-all duration-200 active:scale-95 cursor-pointer
-        ${
-          selected
-            ? `ring-2 ${mood.color} shadow-sm`
-            : "hover:bg-[var(--color-bloom-rose-50)]"
-        }
-      `}
-    >
-      <span className="text-2xl leading-none">{mood.emoji}</span>
-      <span
-        className={`text-[10px] font-medium tracking-wide ${selected ? mood.textColor : "text-[var(--color-text-muted)]"}`}
-      >
-        {mood.label}
-      </span>
-    </button>
-  );
-}
 
 function QuickTileCard({ tile }: { tile: QuickTile }) {
   return (
@@ -286,8 +200,6 @@ function BottomNav({ activeHref }: { activeHref: string }) {
 function HomePageContent() {
   const { user, signOut } = useAuth();
   const router = useRouter();
-  const [selectedMood, setSelectedMood] = useState<MoodKey | null>("okay");
-  const [moodLogged, setMoodLogged] = useState(false);
   const [isSigningOut, setIsSigningOut] = useState(false);
 
   const currentHour = new Date().getHours();
@@ -299,6 +211,13 @@ function HomePageContent() {
         : "Good evening";
 
   const streakDays = 7;
+  // TODO: Get last captured mood from database or localStorage
+  const lastMood = {
+    emoji: "🌿",
+    label: "Okay",
+    textColor: "text-[var(--color-bloom-sage-700)]"
+  };
+  const lastMoodDate = "Today at 11:30 AM";
 
   async function handleSignOut() {
     setIsSigningOut(true);
@@ -309,12 +228,6 @@ function HomePageContent() {
       console.error("Sign out failed:", error);
       setIsSigningOut(false);
     }
-  }
-
-  function handleMoodLog() {
-    if (!selectedMood) return;
-    setMoodLogged(true);
-    // TODO: POST /api/mood { mood: selectedMood, date: new Date() }
   }
 
   return (
@@ -374,54 +287,30 @@ function HomePageContent() {
           </div>
         </header>
 
-        {/* ── Mood check-in card ── */}
-        <section className="mx-4 mt-4" aria-label="Mood check-in">
-          <div className="card px-4 py-4">
-            {moodLogged ? (
-              <div className="flex flex-col items-center gap-2 py-2 text-center">
-                <span className="text-3xl">
-                  {MOODS.find((m) => m.key === selectedMood)?.emoji}
-                </span>
-                <p className="font-[family-name:var(--font-display)] italic text-[var(--color-text-secondary)] text-sm">
-                  Mood logged — thank you for checking in 🌸
-                </p>
-                <button
-                  onClick={() => {
-                    setMoodLogged(false);
-                  }}
-                  className="text-[11px] text-[var(--color-text-muted)] underline underline-offset-2 mt-1"
-                >
-                  Change
-                </button>
-              </div>
-            ) : (
-              <>
-                <p className="text-[13px] text-[var(--color-text-secondary)] mb-3 font-[family-name:var(--font-display)] italic">
-                  Pick the one that feels closest right now
-                </p>
-                <div className="flex justify-between">
-                  {MOODS.map((mood) => (
-                    <MoodButton
-                      key={mood.key}
-                      mood={mood}
-                      selected={selectedMood === mood.key}
-                      onSelect={setSelectedMood}
-                    />
-                  ))}
+        {/* ── Mood card ── */}
+        <section className="mx-4 mt-4" aria-label="Last mood">
+          <Link
+            href="/mood"
+            className="card px-4 py-4 flex items-center justify-between active:scale-[0.98] transition-transform"
+          >
+            <div>
+              <p className="text-[13px] text-[var(--color-text-secondary)] mb-2 font-[family-name:var(--font-display)] italic">
+                How you&apos;re feeling
+              </p>
+              <div className="flex items-center gap-2.5">
+                <span className="text-2xl">{lastMood.emoji}</span>
+                <div>
+                  <p className={`font-medium text-sm ${lastMood.textColor}`}>
+                    {lastMood.label}
+                  </p>
+                  <p className="text-[11px] text-[var(--color-text-muted)]">
+                    {lastMoodDate}
+                  </p>
                 </div>
-                <button
-                  onClick={handleMoodLog}
-                  disabled={!selectedMood}
-                  className="
-                    btn-primary w-full mt-4 text-sm
-                    disabled:opacity-40 disabled:cursor-not-allowed
-                  "
-                >
-                  Log mood
-                </button>
-              </>
-            )}
-          </div>
+              </div>
+            </div>
+            <span className="text-[var(--color-text-brand)] text-lg">→</span>
+          </Link>
         </section>
 
         {/* ── Weekly insight strip ── */}
