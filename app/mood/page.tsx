@@ -9,6 +9,8 @@ import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
 type MoodKey =
   | "happy"
   | "calm"
+  | "excited"
+  | "loved"
   | "meh"
   | "tired"
   | "anxious"
@@ -57,6 +59,30 @@ const MOODS: Mood[] = [
     textColor: "#1C543B",
     noteBg: "#EEF7F2",
     notePlaceholder: "What's helping you feel grounded? 🌿"
+  },
+  {
+    key: "excited",
+    emoji: "🤩",
+    label: "Excited",
+    sublabel: "Energy and anticipation",
+    pageBg: "linear-gradient(160deg, #FCE0D0 0%, #FDF0EB 100%)",
+    ringColor: "#E07B4A",
+    glowColor: "rgba(224,123,74,0.30)",
+    textColor: "#8B4513",
+    noteBg: "#FDF0EB",
+    notePlaceholder: "What's got you excited? 🎉"
+  },
+  {
+    key: "loved",
+    emoji: "🥰",
+    label: "Loved / Appreciated",
+    sublabel: "Feeling connected",
+    pageBg: "linear-gradient(160deg, #FFE0F0 0%, #FFF5FA 100%)",
+    ringColor: "#FF6B9D",
+    glowColor: "rgba(255,107,157,0.28)",
+    textColor: "#C2185B",
+    noteBg: "#FFF5FA",
+    notePlaceholder: "What makes you feel valued? 💕"
   },
   {
     key: "meh",
@@ -280,7 +306,7 @@ function MoodButton({
 
         {/* Emoji */}
         <span
-          className="relative z-10 leading-none"
+          className="relative z-10 leading-none noto-color-emoji"
           style={{
             fontSize: 34,
             transform: isHolding ? `scale(${1 + progress * 0.14})` : "scale(1)",
@@ -366,7 +392,7 @@ function NoteSheet({
         }}
       >
         <span
-          className="leading-none mb-5"
+          className="leading-none mb-5 noto-color-emoji"
           style={{
             fontSize: 72,
             filter: `drop-shadow(0 6px 24px ${mood.glowColor})`
@@ -489,7 +515,7 @@ function DoneView({ mood, hasNote }: { mood: Mood; hasNote: boolean }) {
       }}
     >
       <span
-        className="leading-none"
+        className="leading-none noto-color-emoji"
         style={{
           fontSize: 80,
           filter: `drop-shadow(0 6px 28px ${mood.glowColor})`,
@@ -555,10 +581,12 @@ function MoodPageContent() {
   const handleProgress = useCallback((p: number) => setHoldProgress(p), []);
   const handleCancel = useCallback(() => setHoldProgress(0), []);
 
-  // All 8 hooks — must be unconditional, at top level
+  // All 10 hooks — must be unconditional, at top level
   const lp = {
     happy: useLongPress(handleComplete, handleProgress, handleCancel),
     calm: useLongPress(handleComplete, handleProgress, handleCancel),
+    excited: useLongPress(handleComplete, handleProgress, handleCancel),
+    loved: useLongPress(handleComplete, handleProgress, handleCancel),
     meh: useLongPress(handleComplete, handleProgress, handleCancel),
     tired: useLongPress(handleComplete, handleProgress, handleCancel),
     anxious: useLongPress(handleComplete, handleProgress, handleCancel),
@@ -601,8 +629,14 @@ function MoodPageContent() {
   const greeting =
     hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
 
-  const row1 = MOODS.slice(0, 4);
-  const row2 = MOODS.slice(4, 8);
+  // ── Mood categories ──
+  const positiveRow = MOODS.filter((m) =>
+    ["happy", "calm", "excited", "loved"].includes(m.key)
+  );
+  const neutralRow = MOODS.filter((m) => ["meh", "tired"].includes(m.key));
+  const challengingRow = MOODS.filter((m) =>
+    ["anxious", "frustrated", "sad", "angry"].includes(m.key)
+  );
 
   return (
     <>
@@ -676,39 +710,75 @@ function MoodPageContent() {
           </p>
         </div>
 
-        {/* Mood grid — 4 × 2 */}
-        <div className="flex-1 flex flex-col justify-center gap-5 px-4 py-2">
-          <div className="grid grid-cols-4 gap-1">
-            {row1.map((mood) => (
-              <MoodButton
-                key={mood.key}
-                mood={mood}
-                isActive={activeMood === mood.key}
-                isAnyActive={activeMood !== null}
-                progress={activeMood === mood.key ? holdProgress : 0}
-                onStart={() => startPress(mood.key)}
-                onEnd={() => endPress(mood.key)}
-              />
-            ))}
+        {/* Mood grid — 3 categories */}
+        <div className="flex-1 flex flex-col justify-center gap-6 px-4 py-2">
+          {/* Positive moods */}
+          <div>
+            <p
+              className="text-xs font-semibold uppercase letter-spacing mb-2.5 px-1"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              ✨ Positive moods
+            </p>
+            <div className="grid grid-cols-4 gap-1">
+              {positiveRow.map((mood) => (
+                <MoodButton
+                  key={mood.key}
+                  mood={mood}
+                  isActive={activeMood === mood.key}
+                  isAnyActive={activeMood !== null}
+                  progress={activeMood === mood.key ? holdProgress : 0}
+                  onStart={() => startPress(mood.key)}
+                  onEnd={() => endPress(mood.key)}
+                />
+              ))}
+            </div>
           </div>
 
-          <div
-            className="mx-6 h-px"
-            style={{ background: "var(--color-border-soft)" }}
-          />
+          {/* Neutral / low energy moods */}
+          <div>
+            <p
+              className="text-xs font-semibold uppercase letter-spacing mb-2.5 px-1"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              😐 Neutral / Low Energy
+            </p>
+            <div className="grid grid-cols-4 gap-1">
+              {neutralRow.map((mood) => (
+                <MoodButton
+                  key={mood.key}
+                  mood={mood}
+                  isActive={activeMood === mood.key}
+                  isAnyActive={activeMood !== null}
+                  progress={activeMood === mood.key ? holdProgress : 0}
+                  onStart={() => startPress(mood.key)}
+                  onEnd={() => endPress(mood.key)}
+                />
+              ))}
+            </div>
+          </div>
 
-          <div className="grid grid-cols-4 gap-1">
-            {row2.map((mood) => (
-              <MoodButton
-                key={mood.key}
-                mood={mood}
-                isActive={activeMood === mood.key}
-                isAnyActive={activeMood !== null}
-                progress={activeMood === mood.key ? holdProgress : 0}
-                onStart={() => startPress(mood.key)}
-                onEnd={() => endPress(mood.key)}
-              />
-            ))}
+          {/* Challenging moods */}
+          <div>
+            <p
+              className="text-xs font-semibold uppercase letter-spacing mb-2.5 px-1"
+              style={{ color: "var(--color-text-muted)" }}
+            >
+              ⚡ Challenging Moods
+            </p>
+            <div className="grid grid-cols-4 gap-1">
+              {challengingRow.map((mood) => (
+                <MoodButton
+                  key={mood.key}
+                  mood={mood}
+                  isActive={activeMood === mood.key}
+                  isAnyActive={activeMood !== null}
+                  progress={activeMood === mood.key ? holdProgress : 0}
+                  onStart={() => startPress(mood.key)}
+                  onEnd={() => endPress(mood.key)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

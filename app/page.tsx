@@ -298,7 +298,9 @@ function HomePageContent() {
                 How you&apos;re feeling
               </p>
               <div className="flex items-center gap-2.5">
-                <span className="text-2xl">{lastMood.emoji}</span>
+                <span className="text-2xl noto-color-emoji">
+                  {lastMood.emoji}
+                </span>
                 <div>
                   <p className={`font-medium text-sm ${lastMood.textColor}`}>
                     {lastMood.label}

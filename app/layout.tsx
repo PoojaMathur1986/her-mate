@@ -30,6 +30,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <head>
+        <style>{`@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');`}</style>
+      </head>
       <body className={`${lora.variable} ${dmSans.variable} antialiased`}>
         <AuthProvider>{children}</AuthProvider>
       </body>

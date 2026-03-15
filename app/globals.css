@@ -5,6 +5,7 @@
   --font-display: "Lora", "Georgia", serif; /* headings, emotional copy */
   --font-body: "DM Sans", system-ui, sans-serif; /* UI, labels, body */
   --font-mono: "JetBrains Mono", monospace;
+  --font-emoji: "Noto Color Emoji", sans-serif;
 
   /* Rose — primary brand, CTAs, mood accents */
   --color-bloom-rose-50: #fdf2f6;
@@ -325,5 +326,12 @@
     font-weight: 500;
     background: var(--color-bloom-rose-100);
     color: var(--color-bloom-rose-700);
+  }
+
+  /* Noto Color Emoji */
+  .noto-color-emoji {
+    font-family: "Noto Color Emoji", sans-serif;
+    font-weight: 400;
+    font-style: normal;
   }
 }
