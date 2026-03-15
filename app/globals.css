@@ -1,26 +1,329 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@theme {
+  /* ── Fonts ── */
+  --font-display: "Lora", "Georgia", serif; /* headings, emotional copy */
+  --font-body: "DM Sans", system-ui, sans-serif; /* UI, labels, body */
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Rose — primary brand, CTAs, mood accents */
+  --color-bloom-rose-50: #fdf2f6;
+  --color-bloom-rose-100: #fae0ea;
+  --color-bloom-rose-200: #f4c0d1;
+  --color-bloom-rose-300: #ec94b3;
+  --color-bloom-rose-400: #e06a94;
+  --color-bloom-rose-500: #d4537e; /* primary */
+  --color-bloom-rose-600: #b83968;
+  --color-bloom-rose-700: #932b54;
+  --color-bloom-rose-800: #6b1e3d;
+  --color-bloom-rose-900: #4a1528;
+
+  /* Blush — surfaces, cards, backgrounds */
+  --color-bloom-blush-50: #fdf6f0; /* page background */
+  --color-bloom-blush-100: #fbf0e8;
+  --color-bloom-blush-200: #f7e2d4;
+  --color-bloom-blush-300: #f0c9b0;
+  --color-bloom-blush-400: #e5a882;
+  --color-bloom-blush-500: #d4845a;
+  --color-bloom-blush-600: #b86240;
+  --color-bloom-blush-700: #8f4530;
+  --color-bloom-blush-800: #663020;
+  --color-bloom-blush-900: #421d12;
+
+  /* Petal — soft lilac-pink for journal, safe space */
+  --color-bloom-petal-50: #f8f0fb;
+  --color-bloom-petal-100: #f0defa;
+  --color-bloom-petal-200: #e4c2f5;
+  --color-bloom-petal-300: #d19eed;
+  --color-bloom-petal-400: #b877dc;
+  --color-bloom-petal-500: #9d56c4;
+  --color-bloom-petal-600: #7e3ea8;
+  --color-bloom-petal-700: #612e85;
+  --color-bloom-petal-800: #451f61;
+  --color-bloom-petal-900: #2d123f;
+
+  /* Sage — breathe/grounding, calm states */
+  --color-bloom-sage-50: #eef7f2;
+  --color-bloom-sage-100: #d4ede0;
+  --color-bloom-sage-200: #aedbc4;
+  --color-bloom-sage-300: #7ec4a3;
+  --color-bloom-sage-400: #52a882;
+  --color-bloom-sage-500: #348c66;
+  --color-bloom-sage-600: #27714f;
+  --color-bloom-sage-700: #1c543b;
+  --color-bloom-sage-800: #123828;
+  --color-bloom-sage-900: #0a2219;
+
+  /* Honey — memories, warmth, highlights */
+  --color-bloom-honey-50: #fdf8ee;
+  --color-bloom-honey-100: #faf0d0;
+  --color-bloom-honey-200: #f5e099;
+  --color-bloom-honey-300: #edca60;
+  --color-bloom-honey-400: #dfb030;
+  --color-bloom-honey-500: #c4901a;
+  --color-bloom-honey-600: #9e7012;
+  --color-bloom-honey-700: #78520d;
+  --color-bloom-honey-800: #523808;
+  --color-bloom-honey-900: #312104;
+
+  /* Midnight — rich text, headings */
+  --color-bloom-midnight-50: #f4eff2;
+  --color-bloom-midnight-100: #e2d6dc;
+  --color-bloom-midnight-200: #bda8b4;
+  --color-bloom-midnight-300: #967a88;
+  --color-bloom-midnight-400: #6e5262;
+  --color-bloom-midnight-500: #4d3346;
+  --color-bloom-midnight-600: #3d2535; /* primary text */
+  --color-bloom-midnight-700: #2d1828;
+  --color-bloom-midnight-800: #1e0e1b;
+  --color-bloom-midnight-900: #110610;
+
+  /* ────────────────────────────────────────
+     SEMANTIC TOKENS
+     Use these in components, not raw palette
+  ──────────────────────────────────────── */
+
+  /* Backgrounds */
+  --color-bg-page: var(--color-bloom-blush-50);
+  --color-bg-card: #ffffff;
+  --color-bg-card-soft: var(--color-bloom-rose-50);
+  --color-bg-header: var(--color-bloom-blush-100);
+  --color-bg-overlay: rgba(61, 37, 53, 0.45);
+
+  /* Text */
+  --color-text-primary: var(--color-bloom-midnight-600);
+  --color-text-secondary: var(--color-bloom-midnight-400);
+  --color-text-muted: var(--color-bloom-midnight-300);
+  --color-text-inverse: #ffffff;
+  --color-text-brand: var(--color-bloom-rose-500);
+  --color-text-link: var(--color-bloom-rose-600);
+
+  /* Borders */
+  --color-border-soft: rgba(180, 120, 140, 0.15);
+  --color-border-medium: rgba(180, 120, 140, 0.3);
+  --color-border-strong: rgba(180, 120, 140, 0.55);
+
+  /* Feature tile backgrounds */
+  --color-tile-journal: var(--color-bloom-petal-100); /* soft lilac */
+  --color-tile-space: var(--color-bloom-rose-100); /* blush pink */
+  --color-tile-breathe: var(--color-bloom-sage-100); /* mint green */
+  --color-tile-memories: var(--color-bloom-honey-100); /* warm honey */
+  --color-tile-checkin: var(--color-bloom-blush-100); /* peach */
+  --color-tile-insights: var(--color-bloom-petal-50); /* very soft lilac */
+
+  /* Mood states */
+  --color-mood-heavy: var(--color-bloom-midnight-300);
+  --color-mood-meh: var(--color-bloom-blush-400);
+  --color-mood-okay: var(--color-bloom-sage-400);
+  --color-mood-good: var(--color-bloom-rose-400);
+  --color-mood-bright: var(--color-bloom-honey-400);
+
+  /* Interactive */
+  --color-focus-ring: var(--color-bloom-rose-300);
+  --color-btn-primary: var(--color-bloom-rose-500);
+  --color-btn-primary-hover: var(--color-bloom-rose-600);
+
+  /* ────────────────────────────────────────
+     SPACING & SIZING
+  ──────────────────────────────────────── */
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-xl: 28px;
+  --radius-full: 9999px;
+
+  --shadow-card: 0 2px 16px rgba(180, 100, 130, 0.08);
+  --shadow-float: 0 8px 32px rgba(180, 100, 130, 0.14);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ─────────────────────────────────────────
+   BASE STYLES
+───────────────────────────────────────── */
+@layer base {
+  *,
+  *::before,
+  *::after {
+    box-sizing: border-box;
+  }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  html {
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: var(--color-bg-page);
+    color: var(--color-text-primary);
+    font-size: 1rem;
+    line-height: 1.65;
+    min-height: 100dvh;
+  }
+
+  /* Display font for headings */
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    font-weight: 400;
+    color: var(--color-text-primary);
+    line-height: 1.25;
+  }
+
+  h1 {
+    font-size: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  h2 {
+    font-size: clamp(1.35rem, 3vw, 1.875rem);
+  }
+  h3 {
+    font-size: clamp(1.1rem, 2.5vw, 1.375rem);
+  }
+  h4 {
+    font-size: 1.1rem;
+  }
+
+  p {
+    line-height: 1.7;
+  }
+
+  a {
+    color: var(--color-text-link);
+    text-decoration: none;
+  }
+  a:hover {
+    text-decoration: underline;
+  }
+
+  ::selection {
+    background: var(--color-bloom-rose-200);
+    color: var(--color-bloom-rose-900);
+  }
+
+  /* Focus ring */
+  :focus-visible {
+    outline: 2px solid var(--color-focus-ring);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  /* Smooth scrolling */
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ─────────────────────────────────────────
+   COMPONENT UTILITIES
+   Reusable @apply classes for Bloom UI
+───────────────────────────────────────── */
+@layer components {
+  /* Cards */
+  .card {
+    background: var(--color-bg-card);
+    border: 0.5px solid var(--color-border-soft);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .card-soft {
+    background: var(--color-bg-card-soft);
+    border: 0.5px solid var(--color-border-soft);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Feature tiles */
+  .tile-journal {
+    background: var(--color-tile-journal);
+    border-radius: var(--radius-lg);
+  }
+  .tile-space {
+    background: var(--color-tile-space);
+    border-radius: var(--radius-lg);
+  }
+  .tile-breathe {
+    background: var(--color-tile-breathe);
+    border-radius: var(--radius-lg);
+  }
+  .tile-memories {
+    background: var(--color-tile-memories);
+    border-radius: var(--radius-lg);
+  }
+
+  /* Primary button */
+  .btn-primary {
+    background: var(--color-btn-primary);
+    color: var(--color-text-inverse);
+    border-radius: var(--radius-full);
+    padding: 0.625rem 1.5rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    font-size: 0.9375rem;
+    border: none;
+    cursor: pointer;
+    transition:
+      background 0.15s ease,
+      transform 0.1s ease;
+  }
+  .btn-primary:hover {
+    background: var(--color-btn-primary-hover);
+  }
+  .btn-primary:active {
+    transform: scale(0.98);
+  }
+
+  /* Ghost button */
+  .btn-ghost {
+    background: transparent;
+    color: var(--color-text-brand);
+    border: 1px solid var(--color-border-medium);
+    border-radius: var(--radius-full);
+    padding: 0.6rem 1.4rem;
+    font-family: var(--font-body);
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s ease;
+  }
+  .btn-ghost:hover {
+    background: var(--color-bloom-rose-50);
+  }
+
+  /* Section label */
+  .section-label {
+    font-family: var(--font-body);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-bloom-rose-600);
+  }
+
+  /* Italic serif pull quote (journals, letters) */
+  .pull-quote {
+    font-family: var(--font-display);
+    font-style: italic;
+    font-size: 1.125rem;
+    color: var(--color-text-primary);
+    line-height: 1.6;
+    border-left: 2px solid var(--color-bloom-rose-300);
+    padding-left: 1rem;
+    margin: 1rem 0;
+  }
+
+  /* Mood pill */
+  .mood-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.375rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: var(--radius-full);
+    font-size: 0.8125rem;
+    font-weight: 500;
+    background: var(--color-bloom-rose-100);
+    color: var(--color-bloom-rose-700);
+  }
 }
