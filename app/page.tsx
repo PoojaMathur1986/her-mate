@@ -1,8 +1,6 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
 import { useAuth } from "@/app/lib/AuthContext";
 
@@ -33,7 +31,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Journal",
     sublabel: "Talk or write it out",
     tileClass: "tile-journal",
-    iconBg: "bg-[var(--color-bloom-petal-200)]"
+    iconBg: "bg-[var(--color-bloom-petal-200)]",
   },
   {
     href: "/safe-space",
@@ -41,7 +39,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Safe space",
     sublabel: "Vent, letters & wishes",
     tileClass: "tile-space",
-    iconBg: "bg-[var(--color-bloom-rose-200)]"
+    iconBg: "bg-[var(--color-bloom-rose-200)]",
   },
   {
     href: "/breathe",
@@ -49,7 +47,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Breathe",
     sublabel: "Calm in 2 minutes",
     tileClass: "tile-breathe",
-    iconBg: "bg-[var(--color-bloom-sage-200)]"
+    iconBg: "bg-[var(--color-bloom-sage-200)]",
   },
   {
     href: "/memories",
@@ -57,8 +55,8 @@ const QUICK_TILES: QuickTile[] = [
     label: "Memories",
     sublabel: "My favourite moments",
     tileClass: "tile-memories",
-    iconBg: "bg-[var(--color-bloom-honey-200)]"
-  }
+    iconBg: "bg-[var(--color-bloom-honey-200)]",
+  },
 ];
 
 const RECENT_MEMORIES: MemoryEntry[] = [
@@ -66,14 +64,14 @@ const RECENT_MEMORIES: MemoryEntry[] = [
     id: "1",
     emoji: "☕",
     text: "That first sip of chai in the garden — pure peace.",
-    date: "Yesterday"
+    date: "Yesterday",
   },
   {
     id: "2",
     emoji: "🌅",
     text: "The sky turned the most beautiful shade of pink this morning.",
-    date: "2 days ago"
-  }
+    date: "2 days ago",
+  },
 ];
 
 const NAV_ITEMS = [
@@ -81,7 +79,7 @@ const NAV_ITEMS = [
   { href: "/journal", icon: "📖", label: "Journal" },
   { href: "/mood", icon: "💜", label: "Mood" },
   { href: "/insights", icon: "📊", label: "Insights" },
-  { href: "/profile", icon: "🌸", label: "You" }
+  { href: "/profile", icon: "🌸", label: "You" },
 ];
 
 // ─── Subcomponents ───────────────────────────────────────────────────────────
@@ -198,97 +196,21 @@ function BottomNav({ activeHref }: { activeHref: string }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 function HomePageContent() {
-  const { user, signOut } = useAuth();
-  const router = useRouter();
-  const [isSigningOut, setIsSigningOut] = useState(false);
-
-  const currentHour = new Date().getHours();
-  const greeting =
-    currentHour < 12
-      ? "Good morning"
-      : currentHour < 17
-        ? "Good afternoon"
-        : "Good evening";
-
   const streakDays = 7;
   // TODO: Get last captured mood from database or localStorage
   const lastMood = {
     emoji: "🌿",
     label: "Okay",
-    textColor: "text-[var(--color-bloom-sage-700)]"
+    textColor: "text-[var(--color-bloom-sage-700)]",
   };
   const lastMoodDate = "Today at 11:30 AM";
-
-  async function handleSignOut() {
-    setIsSigningOut(true);
-    try {
-      await signOut();
-      router.push("/login");
-    } catch (error) {
-      console.error("Sign out failed:", error);
-      setIsSigningOut(false);
-    }
-  }
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg-page)] font-[family-name:var(--font-body)]">
       {/* ── Scroll container ── */}
       <div className="max-w-sm mx-auto pb-28">
-        {/* ── Header ── */}
-        <header
-          className="px-5 pt-12 pb-6 relative overflow-hidden"
-          style={{
-            background:
-              "linear-gradient(160deg, var(--color-bloom-blush-100) 0%, var(--color-bloom-rose-50) 100%)"
-          }}
-        >
-          {/* Decorative blobs */}
-          <div
-            aria-hidden
-            className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-20 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle, var(--color-bloom-rose-300), transparent 70%)"
-            }}
-          />
-          <div
-            aria-hidden
-            className="absolute bottom-0 left-4 w-24 h-24 rounded-full opacity-10 pointer-events-none"
-            style={{
-              background:
-                "radial-gradient(circle, var(--color-bloom-petal-300), transparent 70%)"
-            }}
-          />
-
-          <div className="relative flex items-start justify-between">
-            <div>
-              <p className="section-label mb-1">{greeting}</p>
-              <h1 className="font-[family-name:var(--font-display)] text-2xl font-normal text-[var(--color-bloom-midnight-600)] leading-tight">
-                How are you{" "}
-                <em className="italic text-[var(--color-bloom-rose-500)]">
-                  really
-                </em>{" "}
-                feeling today?
-              </h1>
-            </div>
-            <button
-              onClick={handleSignOut}
-              disabled={isSigningOut}
-              className="w-10 h-10 rounded-full bg-[var(--color-bloom-rose-200)] flex items-center justify-center text-lg font-medium text-[var(--color-bloom-rose-800)] shrink-0 ml-3 mt-1 border border-[var(--color-border-soft)] hover:bg-[var(--color-bloom-rose-300)] transition-colors disabled:opacity-50"
-              aria-label="Sign out"
-              title={`Signed in as ${user?.email}`}
-            >
-              {isSigningOut ? "…" : "↪️"}
-            </button>
-          </div>
-
-          <div className="mt-3">
-            <StreakBadge count={streakDays} />
-          </div>
-        </header>
-
         {/* ── Mood card ── */}
-        <section className="mx-4 mt-4" aria-label="Last mood">
+        <section className="mx-4 mt-6" aria-label="Last mood">
           <Link
             href="/mood"
             className="card px-4 py-4 flex items-center justify-between active:scale-[0.98] transition-transform"
@@ -309,6 +231,9 @@ function HomePageContent() {
                     {lastMoodDate}
                   </p>
                 </div>
+              </div>
+              <div className="mt-3">
+                <StreakBadge count={streakDays} />
               </div>
             </div>
             <span className="text-[var(--color-text-brand)] text-lg">→</span>
@@ -336,7 +261,7 @@ function HomePageContent() {
             className="rounded-2xl px-4 py-4 border border-[var(--color-border-soft)]"
             style={{
               background:
-                "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))"
+                "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))",
             }}
           >
             <p className="section-label mb-2">Today&apos;s gentle prompt</p>
