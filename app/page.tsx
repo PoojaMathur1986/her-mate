@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
 import { useAuth } from "@/app/lib/AuthContext";
+import { BottomNav } from "@/app/components/common/BottomNav";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -72,14 +73,6 @@ const RECENT_MEMORIES: MemoryEntry[] = [
     text: "The sky turned the most beautiful shade of pink this morning.",
     date: "2 days ago",
   },
-];
-
-const NAV_ITEMS = [
-  { href: "/", icon: "🏠", label: "Home" },
-  { href: "/journal", icon: "📖", label: "Journal" },
-  { href: "/mood", icon: "💜", label: "Mood" },
-  { href: "/insights", icon: "📊", label: "Insights" },
-  { href: "/profile", icon: "🌸", label: "You" },
 ];
 
 // ─── Subcomponents ───────────────────────────────────────────────────────────
@@ -157,39 +150,6 @@ function StreakBadge({ count }: { count: number }) {
         {count} day streak
       </span>
     </div>
-  );
-}
-
-function BottomNav({ activeHref }: { activeHref: string }) {
-  return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-[var(--color-bg-page)]/95 backdrop-blur-md border-t border-[var(--color-border-soft)]">
-      <div className="max-w-sm mx-auto flex justify-around items-center px-2 py-2 pb-[env(safe-area-inset-bottom)]">
-        {NAV_ITEMS.map((item) => {
-          const isActive = item.href === activeHref;
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`
-                flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl
-                transition-all duration-150 min-w-[52px]
-                ${isActive ? "bg-[var(--color-bloom-rose-100)]" : "hover:bg-[var(--color-bloom-rose-50)]"}
-              `}
-            >
-              <span className="text-[18px] leading-none">{item.icon}</span>
-              <span
-                className={`text-[10px] font-medium tracking-wide ${isActive ? "text-[var(--color-text-brand)]" : "text-[var(--color-text-muted)]"}`}
-              >
-                {item.label}
-              </span>
-              {isActive && (
-                <span className="w-1 h-1 rounded-full bg-[var(--color-bloom-rose-400)] mt-0.5" />
-              )}
-            </Link>
-          );
-        })}
-      </div>
-    </nav>
   );
 }
 
