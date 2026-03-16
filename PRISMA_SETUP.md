@@ -33,7 +33,7 @@ Simplified Prisma 7.5 schema for mood logging in Her-Mate, designed to start sim
 - night (21:00–04:59)
 - Captures when moods occur throughout the day for insights
 
-**Soft deletes** — `deletedAt` field allows undo functionality without data loss
+**Immutable logs** — Mood entries cannot be deleted once logged, ensuring data integrity
 
 **Minimal indexes** — Only essential indexes for common queries
 
@@ -72,7 +72,27 @@ Edit `.env`:
 DATABASE_URL=postgresql://user:password@localhost:5432/her-mate
 ```
 
-### 3. Create Database Migrations
+### 3. Prisma 7.5 Configuration
+
+Prisma 7.5 requires connection URLs to be in `prisma.config.ts` at the project root (not in the prisma directory).
+
+The config file is already created at [prisma.config.ts](prisma.config.ts):
+
+```typescript
+import { defineConfig } from "@prisma/internals";
+
+export default defineConfig({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL,
+    },
+  },
+});
+```
+
+This reads the `DATABASE_URL` environment variable for migrations and database operations.
+
+### 4. Create Database Migrations
 
 ```bash
 npx prisma migrate dev --name init
@@ -84,7 +104,7 @@ This will:
 - Generate Prisma Client for type-safe queries
 - Track migration history
 
-### 4. Verify Setup
+### 5. Verify Setup
 
 ```bash
 npx prisma studio
@@ -132,7 +152,6 @@ const moodLog = await prisma.moodLog.create({
 const recentMoods = await prisma.moodLog.findMany({
   where: {
     userId: "firebase-user-uid",
-    deletedAt: null, // exclude soft-deleted
   },
   orderBy: { createdAt: "desc" },
   take: 10,
@@ -146,7 +165,6 @@ const moodCounts = await prisma.moodLog.groupBy({
   by: ["mood"],
   where: {
     userId: "firebase-user-uid",
-    deletedAt: null,
     createdAt: {
       gte: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), // last 30 days
     },
@@ -155,36 +173,25 @@ const moodCounts = await prisma.moodLog.groupBy({
 });
 ```
 
-### Soft Delete (Undo)
-
-```typescript
-// Mark as deleted
-await prisma.moodLog.update({
-  where: { id: "mood-log-id" },
-  data: { deletedAt: new Date() },
-});
-
-// Restore
-await prisma.moodLog.update({
-  where: { id: "mood-log-id" },
-  data: { deletedAt: null },
-});
-```
-
 ## Prisma 7.5 Configuration
 
-### Key Settings
+### Schema Structure
 
-The schema is configured for Prisma 7.5 with:
+In Prisma 7.5, the schema file no longer contains connection URLs. The datasource is minimal:
+
+```prisma
+datasource db {
+  provider = "postgresql"
+}
+```
+
+Connection URLs are managed in [prisma.config.ts](prisma.config.ts) at the project root, which reads from your environment variables.
+
+The generator remains standard:
 
 ```prisma
 generator client {
   provider = "prisma-client-js"
-}
-
-datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
 }
 ```
 
@@ -244,7 +251,6 @@ export async function GET(req: NextRequest) {
     const moods = await prisma.moodLog.findMany({
       where: {
         userId,
-        deletedAt: null,
       },
       orderBy: { createdAt: "desc" },
     });
@@ -338,9 +344,9 @@ npx prisma migrate reset
 ✅ **Do:**
 
 - Use the singleton pattern for PrismaClient (prevents connection exhaustion)
-- Always include `deletedAt: null` in read queries if soft-deleting
 - Handle Prisma errors in try-catch blocks
 - Use `.findUnique()` when querying by unique fields
+- Ensure users understand mood logs are immutable once created
 
 ❌ **Don't:**
 
