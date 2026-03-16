@@ -4,11 +4,10 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 import { NextRequest, NextResponse } from "next/server";
-import { DaySlot, MoodCategory, MoodType, PrismaClient } from "@prisma/client";
+import { MoodType, MoodCategory, DaySlot } from "@prisma/client";
 import { adminAuth } from "@/app/lib/firebaseAdmin";
 import { getCurrentSlot, getMoodCategory } from "@/app/lib/slots";
-
-const prisma = new PrismaClient();
+import { prisma } from "@/app/lib/prisma";
 
 // Valid mood types
 const VALID_MOODS = [
@@ -139,8 +138,6 @@ export async function POST(
             { success: false, error: "Failed to save mood" },
             { status: 500 }
         );
-    } finally {
-        await prisma.$disconnect();
     }
 }
 
