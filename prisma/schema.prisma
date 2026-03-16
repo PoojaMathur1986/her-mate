@@ -1,0 +1,76 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// HER-MATE — Prisma Schema
+// Mood Logging
+// DB: PostgreSQL
+// ═══════════════════════════════════════════════════════════════════════════
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// ENUMS
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum MoodType {
+  happy
+  calm
+  excited
+  loved
+  meh
+  tired
+  anxious
+  frustrated
+  sad
+  angry
+}
+
+enum MoodCategory {
+  positive
+  neutral
+  challenging
+}
+
+enum DaySlot {
+  morning    // 05:00–11:59
+  afternoon  // 12:00–16:59
+  evening    // 17:00–20:59
+  night      // 21:00–04:59
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// MOOD LOG
+// Core mood logging table. userId is a string referencing Firebase Auth UID.
+// No User model relationship yet — will be added when user schema is implemented.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model MoodLog {
+  id            String        @id @default(uuid())
+  
+  // Firebase Auth UID (no foreign key constraint yet)
+  userId        String
+  
+  // Mood details
+  mood          MoodType
+  category      MoodCategory  // positive, neutral, or challenging
+  slot          DaySlot       // morning, afternoon, evening, or night
+  note          String?       @db.Text           // supports longer notes
+  
+  // Timestamps
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Indexes for common queries
+  @@index([userId])
+  @@index([userId, createdAt(sort: Desc)])      // recent logs for user
+  @@index([mood])                               // filter by mood type
+  @@index([createdAt(sort: Desc)])              // global timeline
+  
+  @@map("mood_logs")
+}
