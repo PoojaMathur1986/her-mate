@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
+import { saveMoodLog } from "@/app/lib/moodClient";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -562,6 +563,7 @@ function MoodPageContent() {
   const [pendingMood, setPendingMood] = useState<Mood | null>(null);
   const [savedMood, setSavedMood] = useState<Mood | null>(null);
   const [savedHasNote, setSavedHasNote] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const activeMoodObj = MOODS.find((m) => m.key === activeMood) ?? null;
   const pendingMoodRef = useRef<Mood | null>(null);
@@ -610,14 +612,27 @@ function MoodPageContent() {
   }
 
   // ── Note sheet resolution ──
-  function handleSaveNote(note: string) {
-    if (!pendingMood) return;
-    const hasNote = note.length > 0;
-    // TODO: POST /api/mood { mood: pendingMood.key, note, date: new Date().toISOString() }
-    setSavedMood(pendingMood);
-    setSavedHasNote(hasNote);
-    setView("done");
-    setTimeout(() => router.push("/"), 2400);
+  async function handleSaveNote(note: string) {
+    if (!pendingMood || isSaving) return;
+
+    setIsSaving(true);
+    try {
+      // Call API to save mood
+      await saveMoodLog({
+        mood: pendingMood.key,
+        note: note.trim() || ""
+      });
+
+      const hasNote = note.length > 0;
+      setSavedMood(pendingMood);
+      setSavedHasNote(hasNote);
+      setView("done");
+      setTimeout(() => router.push("/"), 2400);
+    } catch (error) {
+      console.error("Failed to save mood:", error);
+      // TODO: Show error toast/notification to user
+      setIsSaving(false);
+    }
   }
 
   function handleSkipNote() {
