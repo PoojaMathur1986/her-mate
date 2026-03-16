@@ -4,6 +4,7 @@ import { Lora, DM_Sans } from "next/font/google";
 
 import "./globals.css";
 import { AuthProvider } from "./lib/AuthContext";
+import { Header } from "./components/common/Header";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-display" });
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-body" });
@@ -20,11 +21,11 @@ const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-body" });
 
 export const metadata: Metadata = {
   title: "HerMate",
-  description: "Your personal mood and mental health companion"
+  description: "Your personal mood and mental health companion",
 };
 
 export default function RootLayout({
-  children
+  children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
@@ -33,8 +34,13 @@ export default function RootLayout({
       <head>
         <style>{`@import url('https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap');`}</style>
       </head>
-      <body className={`${lora.variable} ${dmSans.variable} antialiased`}>
-        <AuthProvider>{children}</AuthProvider>
+      <body
+        className={`${lora.variable} ${dmSans.variable} antialiased bg-[var(--color-bg-page)] max-w-sm mx-auto`}
+      >
+        <AuthProvider>
+          <Header />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );
