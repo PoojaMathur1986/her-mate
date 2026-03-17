@@ -148,22 +148,10 @@ function MemoryCard({ memory }: { memory: MemoryEntry }) {
   );
 }
 
-function StreakBadge({ count }: { count: number }) {
-  return (
-    <div className="flex items-center gap-1.5 bg-[var(--color-bloom-honey-100)] px-3 py-1.5 rounded-full border border-[var(--color-bloom-honey-200)]">
-      <span className="text-sm">🔥</span>
-      <span className="text-[12px] font-medium text-[var(--color-bloom-honey-700)]">
-        {count} day streak
-      </span>
-    </div>
-  );
-}
-
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 function HomePageContent() {
   const { user } = useAuth();
-  const streakDays = 7;
 
   const [lastMood, setLastMood] = useState<
     (MoodDisplay & { createdAt: string }) | null
@@ -244,9 +232,6 @@ function HomePageContent() {
                         {formatMoodDate(lastMood.createdAt)}
                       </p>
                     </div>
-                  </div>
-                  <div className="mt-3">
-                    <StreakBadge count={streakDays} />
                   </div>
                 </>
               ) : (
