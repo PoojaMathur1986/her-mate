@@ -2,6 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 import { BottomNav } from "@/app/components/common/BottomNav";
+import {
+  fetchJournalEntries,
+  createJournalEntry,
+  updateJournalEntry,
+  deleteJournalEntry
+} from "@/app/lib/journalClient";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -81,49 +87,6 @@ function getLast28Days(): {
     });
   }
   return days;
-}
-
-// ─── Seed data ────────────────────────────────────────────────────────────────
-
-function getSeedEntries(): JournalEntry[] {
-  const today = new Date();
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  const twoDaysAgo = new Date(today);
-  twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-  const fourDaysAgo = new Date(today);
-  fourDaysAgo.setDate(fourDaysAgo.getDate() - 4);
-
-  return [
-    {
-      id: "seed-1",
-      text: "Woke up to rain today. Made chai and watched the drops race down the window. Something about the sound of rain makes everything feel slower, softer.",
-      emoji: "☁️",
-      timestamp: new Date(yesterday.setHours(8, 14)),
-      dateKey: toDateKey(yesterday)
-    },
-    {
-      id: "seed-2",
-      text: "Had a really honest conversation with myself on the walk home. I've been saying yes to too many things that don't actually excite me.",
-      emoji: "💭",
-      timestamp: new Date(yesterday.setHours(18, 42)),
-      dateKey: toDateKey(yesterday)
-    },
-    {
-      id: "seed-3",
-      text: "Read almost 80 pages today. A good book is the best kind of escape — the kind you come back from feeling more like yourself.",
-      emoji: "🌿",
-      timestamp: new Date(twoDaysAgo.setHours(21, 7)),
-      dateKey: toDateKey(twoDaysAgo)
-    },
-    {
-      id: "seed-4",
-      text: "The sunset from the terrace was absolutely ridiculous today. Stood there for fifteen minutes. Felt very small and very okay with that.",
-      emoji: "🌸",
-      timestamp: new Date(fourDaysAgo.setHours(19, 30)),
-      dateKey: toDateKey(fourDaysAgo)
-    }
-  ];
 }
 
 // ─── Subcomponents ────────────────────────────────────────────────────────────
@@ -534,49 +497,115 @@ function WeekStrip({
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 export default function JournalPage() {
-  const [entries, setEntries] = useState<JournalEntry[]>(getSeedEntries);
+  const [selectedEntries, setSelectedEntries] = useState<JournalEntry[]>([]);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(
     toDateKey(new Date())
   );
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [allEntries, setAllEntries] = useState<JournalEntry[]>([]);
+
   const days = getLast28Days();
-
   const today = toDateKey(new Date());
-  const todayEntries = entries.filter((e) => e.dateKey === today);
-  const selectedEntries = entries.filter((e) => e.dateKey === selectedDateKey);
 
-  const entryCountByDate = entries.reduce<Record<string, number>>((acc, e) => {
-    acc[e.dateKey] = (acc[e.dateKey] ?? 0) + 1;
-    return acc;
-  }, {});
+  // Fetch entries for the selected date
+  useEffect(() => {
+    const fetchEntries = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const apiEntries = await fetchJournalEntries(selectedDateKey);
+        const transformedEntries: JournalEntry[] = apiEntries.map((e) => ({
+          id: e.id,
+          text: e.text,
+          emoji: e.emoji,
+          timestamp: new Date(e.timestamp),
+          dateKey: selectedDateKey
+        }));
+        setSelectedEntries(transformedEntries);
 
-  function addEntry(text: string, emoji: string) {
-    const now = new Date();
-    setEntries((prev) => [
-      ...prev,
-      {
-        id: `entry-${Date.now()}`,
-        text,
-        emoji,
-        timestamp: now,
-        dateKey: toDateKey(now)
+        // Update allEntries for the count sidebar
+        setAllEntries((prev) => {
+          const filtered = prev.filter((e) => e.dateKey !== selectedDateKey);
+          return [...filtered, ...transformedEntries];
+        });
+      } catch (err) {
+        console.error("Failed to fetch entries:", err);
+        setError(
+          err instanceof Error ? err.message : "Failed to fetch entries"
+        );
+        setSelectedEntries([]);
+      } finally {
+        setLoading(false);
       }
-    ]);
-    // Make sure today is selected after adding
-    setSelectedDateKey(today);
+    };
+
+    fetchEntries();
+  }, [selectedDateKey]);
+
+  const todayEntries = allEntries.filter((e) => e.dateKey === today);
+
+  const entryCountByDate = allEntries.reduce<Record<string, number>>(
+    (acc, e) => {
+      acc[e.dateKey] = (acc[e.dateKey] ?? 0) + 1;
+      return acc;
+    },
+    {}
+  );
+
+  async function addEntry(text: string, emoji: string) {
+    try {
+      setError(null);
+      const newEntry = await createJournalEntry({ text, emoji });
+      const entry: JournalEntry = {
+        id: newEntry.id,
+        text: newEntry.text,
+        emoji: newEntry.emoji,
+        timestamp: new Date(newEntry.timestamp),
+        dateKey: toDateKey(new Date())
+      };
+      setSelectedEntries((prev) => [...prev, entry]);
+      setAllEntries((prev) => [...prev, entry]);
+      setSelectedDateKey(today);
+    } catch (err) {
+      console.error("Failed to add entry:", err);
+      setError(err instanceof Error ? err.message : "Failed to add entry");
+    }
   }
 
-  function editEntry(id: string, newText: string) {
-    setEntries((prev) =>
-      prev.map((e) => (e.id === id ? { ...e, text: newText } : e))
-    );
+  async function editEntry(id: string, newText: string) {
+    try {
+      setError(null);
+      const updated = await updateJournalEntry(id, { text: newText });
+      const entry: JournalEntry = {
+        id: updated.id,
+        text: updated.text,
+        emoji: updated.emoji,
+        timestamp: new Date(updated.timestamp),
+        dateKey: selectedDateKey
+      };
+      setSelectedEntries((prev) => prev.map((e) => (e.id === id ? entry : e)));
+      setAllEntries((prev) => prev.map((e) => (e.id === id ? entry : e)));
+    } catch (err) {
+      console.error("Failed to edit entry:", err);
+      setError(err instanceof Error ? err.message : "Failed to edit entry");
+    }
   }
 
-  function deleteEntry(id: string) {
-    setEntries((prev) => prev.filter((e) => e.id !== id));
+  async function deleteEntry(id: string) {
+    try {
+      setError(null);
+      await deleteJournalEntry(id);
+      setSelectedEntries((prev) => prev.filter((e) => e.id !== id));
+      setAllEntries((prev) => prev.filter((e) => e.id !== id));
+    } catch (err) {
+      console.error("Failed to delete entry:", err);
+      setError(err instanceof Error ? err.message : "Failed to delete entry");
+    }
   }
 
   const isViewingToday = selectedDateKey === today;
-  const hasSelectedEntries = selectedEntries.length > 0;
+  // const hasSelectedEntries = selectedEntries.length > 0;
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg-page)] font-[family-name:var(--font-body)]">
@@ -606,12 +635,23 @@ export default function JournalPage() {
               </em>
             </h1>
             <p className="text-[12px] text-[var(--color-text-secondary)] mt-1">
-              {todayEntries.length === 0
-                ? "Nothing written today yet — what's on your mind?"
-                : `${todayEntries.length} ${todayEntries.length === 1 ? "entry" : "entries"} today`}
+              {loading
+                ? "Loading entries..."
+                : todayEntries.length === 0
+                  ? "Nothing written today yet — what's on your mind?"
+                  : `${todayEntries.length} ${todayEntries.length === 1 ? "entry" : "entries"} today`}
             </p>
           </div>
         </header>
+
+        {/* ── Error notification ── */}
+        {error && (
+          <div className="mx-4 mt-4 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200">
+            <p className="text-[11px] text-red-600 text-center leading-relaxed">
+              {error}
+            </p>
+          </div>
+        )}
 
         {/* ── Calendar strip ── */}
         <section className="mt-4" aria-label="Date navigator">
@@ -632,7 +672,14 @@ export default function JournalPage() {
 
         {/* ── Entries for selected day ── */}
         <section className="mt-5 px-4" aria-label="Journal entries">
-          {hasSelectedEntries ? (
+          {loading ? (
+            <div className="flex flex-col items-center gap-2 py-10 text-center">
+              <span className="text-2xl animate-pulse">✨</span>
+              <p className="text-[13px] text-[var(--color-text-muted)] font-[family-name:var(--font-display)] italic">
+                Loading your pages...
+              </p>
+            </div>
+          ) : selectedEntries.length > 0 ? (
             <DaySection
               dateKey={selectedDateKey}
               entries={selectedEntries
@@ -654,7 +701,7 @@ export default function JournalPage() {
         </section>
 
         {/* ── Sealed notice for past days ── */}
-        {!isViewingToday && hasSelectedEntries && (
+        {!isViewingToday && selectedEntries.length > 0 && (
           <div className="mx-4 mt-3 px-3 py-2.5 rounded-xl bg-[var(--color-bloom-petal-50)] border border-[var(--color-bloom-petal-100)]">
             <p className="text-[11px] text-[var(--color-bloom-petal-600)] text-center leading-relaxed">
               🔒 These entries are sealed — past pages can&apos;t be edited, but
