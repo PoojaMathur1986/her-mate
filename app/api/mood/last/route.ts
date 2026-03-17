@@ -45,11 +45,14 @@ export async function GET(
         // Verify authentication
         const userId = await verifyToken(request);
         if (!userId) {
+            console.warn("❌ Token verification failed");
             return NextResponse.json(
                 { success: false, error: "Unauthorized" },
                 { status: 401 }
             );
         }
+
+        console.log("✅ Token verified for userId:", userId);
 
         // Fetch the most recent mood log for this user
         const lastMood = await prisma.moodLog.findFirst({
@@ -58,13 +61,14 @@ export async function GET(
         });
 
         if (!lastMood) {
+            console.log("⚠️ No mood found for userId:", userId);
             return NextResponse.json(
                 { success: false, error: "No mood data found" },
                 { status: 404 }
             );
         }
 
-        console.log(lastMood.createdAt);
+        console.log("✅ Found mood:", lastMood);
 
         return NextResponse.json(
             {
@@ -80,7 +84,7 @@ export async function GET(
             { status: 200 }
         );
     } catch (error) {
-        console.error("Error fetching last mood:", error);
+        console.error("❌ Error fetching last mood:", error);
         return NextResponse.json(
             { success: false, error: "Failed to fetch mood" },
             { status: 500 }

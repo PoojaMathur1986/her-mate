@@ -34,9 +34,11 @@ function isEntryToday(entryDate: Date): boolean {
 
 export async function PATCH(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: entryId } = await params;
+
         // Verify Firebase ID token
         const authHeader = req.headers.get("authorization");
         if (!authHeader?.startsWith("Bearer ")) {
@@ -52,7 +54,6 @@ export async function PATCH(
         }
 
         const userId = decodedToken.uid;
-        const entryId = params.id;
 
         // Fetch entry
         const entry = await prisma.journalEntry.findUnique({
@@ -136,9 +137,11 @@ export async function PATCH(
 
 export async function DELETE(
     req: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id: entryId } = await params;
+
         // Verify Firebase ID token
         const authHeader = req.headers.get("authorization");
         if (!authHeader?.startsWith("Bearer ")) {
@@ -154,7 +157,6 @@ export async function DELETE(
         }
 
         const userId = decodedToken.uid;
-        const entryId = params.id;
 
         // Fetch entry
         const entry = await prisma.journalEntry.findUnique({

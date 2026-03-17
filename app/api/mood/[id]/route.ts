@@ -45,9 +45,11 @@ async function verifyToken(request: NextRequest): Promise<string | null> {
 
 export async function PATCH(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ): Promise<NextResponse<UpdateMoodResponse>> {
     try {
+        const { id: moodId } = await params;
+
         // Verify authentication
         const userId = await verifyToken(request);
         if (!userId) {
@@ -56,8 +58,6 @@ export async function PATCH(
                 { status: 401 }
             );
         }
-
-        const moodId = params.id;
 
         // Parse request body
         const body: UpdateMoodRequest = await request.json();

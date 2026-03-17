@@ -176,16 +176,21 @@ function HomePageContent() {
 
         if (response.ok) {
           const data = await response.json();
+          console.log("✅ Mood API response:", data);
           if (data.success && data.data) {
             const display = getMoodDisplay(data.data.mood);
             setLastMood({
               ...display,
               createdAt: data.data.createdAt
             });
+            console.log("✅ Mood set:", display);
           }
+        } else {
+          const error = await response.json();
+          console.warn("⚠️ Mood API error:", response.status, error);
         }
       } catch (error) {
-        console.error("Failed to fetch last mood:", error);
+        console.error("❌ Failed to fetch last mood:", error);
       } finally {
         setIsLoadingMood(false);
       }
