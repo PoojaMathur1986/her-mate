@@ -316,7 +316,7 @@ function NewEntryComposer({
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="What's on your mind right now?"
-            rows={4}
+            rows={6}
             className="
               w-full text-[13px] text-[var(--color-text-primary)] leading-relaxed
               font-[family-name:var(--font-display)] italic placeholder:text-[var(--color-text-muted)]
@@ -612,7 +612,7 @@ export default function JournalPage() {
       <div className="max-w-sm mx-auto pb-28">
         {/* ── Header ── */}
         <header
-          className="px-5 pt-12 pb-5 relative overflow-hidden"
+          className="px-5 py-3 relative overflow-hidden"
           style={{
             background:
               "linear-gradient(160deg, var(--color-bloom-petal-50) 0%, var(--color-bloom-rose-50) 100%)"
