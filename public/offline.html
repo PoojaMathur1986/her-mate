@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HerMate - Offline</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+          "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+          sans-serif;
+        background: linear-gradient(160deg, #faf0d0 0%, #fdf8ee 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+      }
+
+      .container {
+        text-align: center;
+        max-width: 400px;
+      }
+
+      .emoji {
+        font-size: 72px;
+        margin-bottom: 20px;
+        display: block;
+      }
+
+      h1 {
+        font-size: 28px;
+        color: #78520d;
+        margin-bottom: 12px;
+        font-weight: 600;
+      }
+
+      p {
+        font-size: 16px;
+        color: #8f6b3d;
+        line-height: 1.6;
+        margin-bottom: 24px;
+      }
+
+      .info {
+        background: rgba(255, 255, 255, 0.5);
+        border: 1px solid rgba(223, 176, 48, 0.3);
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 24px;
+        font-size: 14px;
+        color: #6b4e1f;
+      }
+
+      button {
+        background: #dfb030;
+        color: #78520d;
+        border: none;
+        border-radius: 8px;
+        padding: 12px 24px;
+        font-size: 16px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      button:active {
+        transform: scale(0.97);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <span class="emoji">📱</span>
+      <h1>You're offline</h1>
+      <p>
+        It looks like you've lost your connection. Your mood logs will sync when
+        you're back online.
+      </p>
+      <div class="info">
+        Your data is safe and will be saved locally. Just reconnect when you
+        have internet access.
+      </div>
+      <button onclick="location.reload()">Try again</button>
+    </div>
+  </body>
+</html>
