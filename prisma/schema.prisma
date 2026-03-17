@@ -74,3 +74,40 @@ model MoodLog {
   
   @@map("mood_logs")
 }
+
+
+// ─────────────────────────────────────────────────────────────────────────────
+// JOURNAL ENTRY
+// User journal/notes entries. Users can create/edit multiple entries per day.
+// Editing is restricted to today's entries; previous entries are locked.
+// All entries can be soft-deleted by the user.
+// ─────────────────────────────────────────────────────────────────────────────
+
+model JournalEntry {
+  id            String        @id @default(cuid())
+  
+  // Firebase Auth UID (no foreign key constraint yet)
+  userId        String
+  
+  // Entry content
+  text          String        @db.Text           // journal entry text
+  emoji         String        @default("✨")     // sticker chosen by user
+  
+  // Date (stored as Date, no time component for timezone-safe comparison)
+  date          DateTime      @db.Date           // calendar day: 2025-03-17
+  
+  // Timestamps (exact write moment for sorting within a day)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  
+  // Soft delete tracking
+  isDeleted     Boolean       @default(false)
+  deletedAt     DateTime?
+  
+  // Indexes for common queries
+  @@index([userId, date])                       // fetch entries for user on specific day
+  @@index([userId, isDeleted])                  // list active entries for user
+  @@index([date(sort: Desc)])                   // recent entries timeline
+  
+  @@map("journal_entries")
+}
