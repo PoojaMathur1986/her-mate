@@ -23,7 +23,8 @@ const Textarea = React.forwardRef<HTMLTextAreaElement, TextareaProps>(
     ref,
   ) => {
     const [charCount, setCharCount] = React.useState(0);
-    const textareaId = id || `textarea-${Math.random()}`;
+    const generatedId = React.useId();
+    const textareaId = id || generatedId;
 
     const handleChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
       setCharCount(e.target.value.length);
