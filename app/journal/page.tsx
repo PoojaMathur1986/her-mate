@@ -2,6 +2,7 @@
 
 import { useState, useRef, useEffect } from "react";
 import { BottomNav } from "@/app/components/common/BottomNav";
+import { Button, Textarea } from "@/app/components/ui";
 import {
   fetchJournalEntries,
   createJournalEntry,
@@ -178,34 +179,27 @@ function EntryCard({
         <div className="flex-1 min-w-0">
           {editing ? (
             <>
-              <textarea
+              <Textarea
                 ref={textareaRef}
                 value={draft}
                 onChange={(e) => setDraft(e.target.value)}
                 rows={4}
-                className="
-                  w-full text-[13px] text-[var(--color-text-primary)] leading-relaxed
-                  font-[family-name:var(--font-display)] italic
-                  resize-none bg-transparent outline-none
-                  border-b border-[var(--color-bloom-rose-200)] pb-1
-                "
+                className="font-[family-name:var(--font-display)] italic"
               />
               <div className="flex gap-2 mt-2">
-                <button
-                  onClick={saveEdit}
-                  className="btn-primary text-[11px] px-3 py-1.5"
-                >
+                <Button onClick={saveEdit} variant="primary" size="sm">
                   Save
-                </button>
-                <button
+                </Button>
+                <Button
                   onClick={() => {
                     setEditing(false);
                     setDraft(entry.text);
                   }}
-                  className="btn-ghost text-[11px] px-3 py-1.5"
+                  variant="secondary"
+                  size="sm"
                 >
                   Cancel
-                </button>
+                </Button>
               </div>
             </>
           ) : (
@@ -227,40 +221,48 @@ function EntryCard({
             {!editing && (
               <div className="flex items-center gap-2">
                 {!sealed && (
-                  <button
+                  <Button
                     onClick={() => setEditing(true)}
-                    className="text-[11px] text-[var(--color-text-brand)] hover:underline underline-offset-2 transition-opacity"
+                    variant="tertiary"
+                    size="sm"
+                    className="text-[11px]"
                     aria-label="Edit entry"
                   >
                     Edit
-                  </button>
+                  </Button>
                 )}
                 {confirmDelete ? (
                   <div className="flex items-center gap-1.5">
                     <span className="text-[10px] text-[var(--color-bloom-midnight-400)]">
                       Remove?
                     </span>
-                    <button
+                    <Button
                       onClick={() => onDelete(entry.id)}
-                      className="text-[10px] text-red-500 font-medium hover:underline"
+                      variant="danger"
+                      size="sm"
+                      className="text-[10px]"
                     >
                       Yes
-                    </button>
-                    <button
+                    </Button>
+                    <Button
                       onClick={() => setConfirmDelete(false)}
-                      className="text-[10px] text-[var(--color-text-muted)] hover:underline"
+                      variant="secondary"
+                      size="sm"
+                      className="text-[10px]"
                     >
                       No
-                    </button>
+                    </Button>
                   </div>
                 ) : (
-                  <button
+                  <Button
                     onClick={() => setConfirmDelete(true)}
-                    className="text-[11px] text-[var(--color-text-muted)] hover:text-red-400 transition-colors"
+                    variant="tertiary"
+                    size="sm"
+                    className="text-[11px]"
                     aria-label="Delete entry"
                   >
                     ✕
-                  </button>
+                  </Button>
                 )}
               </div>
             )}
@@ -300,40 +302,37 @@ function NewEntryComposer({
       }}
     >
       {!expanded ? (
-        <button
+        <Button
           onClick={() => {
             setExpanded(true);
             setTimeout(() => textareaRef.current?.focus(), 50);
           }}
-          className="w-full text-left text-[13px] text-[var(--color-text-muted)] font-[family-name:var(--font-display)] italic cursor-text"
+          variant="tertiary"
+          className="w-full justify-start text-left text-[13px] font-[family-name:var(--font-display)] italic"
         >
           What&apos;s on your mind right now?
-        </button>
+        </Button>
       ) : (
         <>
-          <textarea
+          <Textarea
             ref={textareaRef}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder="What's on your mind right now?"
             rows={6}
-            className="
-              w-full text-[13px] text-[var(--color-text-primary)] leading-relaxed
-              font-[family-name:var(--font-display)] italic placeholder:text-[var(--color-text-muted)]
-              resize-none bg-transparent outline-none
-            "
+            className="font-[family-name:var(--font-display)] italic"
           />
           <div className="flex items-center justify-between mt-3 pt-3 border-t border-[var(--color-border-soft)]">
             <div className="relative">
-              <button
+              <Button
                 onClick={() => setShowPicker((v) => !v)}
-                className="flex items-center gap-1.5 text-sm px-2.5 py-1.5 rounded-xl hover:bg-[var(--color-bloom-rose-100)] transition-colors"
+                variant="secondary"
+                size="sm"
+                className="flex items-center gap-1.5 text-sm px-2.5 py-1.5"
               >
                 <span>{emoji}</span>
-                <span className="text-[11px] text-[var(--color-text-muted)]">
-                  sticker
-                </span>
-              </button>
+                <span className="text-[11px]">sticker</span>
+              </Button>
               {showPicker && (
                 <EmojiPicker
                   selected={emoji}
@@ -343,22 +342,24 @@ function NewEntryComposer({
               )}
             </div>
             <div className="flex gap-2">
-              <button
+              <Button
                 onClick={() => {
                   setExpanded(false);
                   setText("");
                 }}
-                className="btn-ghost text-[11px] px-3 py-1.5"
+                variant="secondary"
+                size="sm"
               >
                 Cancel
-              </button>
-              <button
+              </Button>
+              <Button
                 onClick={handleSave}
                 disabled={!text.trim()}
-                className="btn-primary text-[11px] px-3 py-1.5 disabled:opacity-40 disabled:cursor-not-allowed"
+                variant="primary"
+                size="sm"
               >
                 Add entry
-              </button>
+              </Button>
             </div>
           </div>
         </>
