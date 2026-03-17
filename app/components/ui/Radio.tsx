@@ -30,7 +30,8 @@ const RadioGroup = React.forwardRef<HTMLInputElement, RadioGroupProps>(
     },
     ref,
   ) => {
-    const radioName = name || `radio-${Math.random()}`;
+    const generatedId = React.useId();
+    const radioName = name || id || generatedId;
 
     return (
       <div className="w-full">

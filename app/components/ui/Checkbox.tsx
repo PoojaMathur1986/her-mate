@@ -7,7 +7,8 @@ export interface CheckboxProps extends React.InputHTMLAttributes<HTMLInputElemen
 
 const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ({ className, label, error, id, ...props }, ref) => {
-    const checkboxId = id || `checkbox-${Math.random()}`;
+    const generatedId = React.useId();
+    const checkboxId = id || generatedId;
 
     return (
       <div className="flex items-start gap-2">

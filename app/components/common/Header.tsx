@@ -2,37 +2,30 @@
 
 import { useAuth } from "@/app/lib/AuthContext";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+
+function getGreeting(): string {
+  const hour = new Date().getHours();
+  if (hour >= 5 && hour < 12) {
+    return "Good Morning";
+  } else if (hour >= 12 && hour < 17) {
+    return "Good Afternoon";
+  } else {
+    return "Good Evening";
+  }
+}
 
 export function Header() {
   const { user, loading } = useAuth();
   const pathname = usePathname();
-  const [greeting, setGreeting] = useState<string>("");
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const hour = new Date().getHours();
-
-    if (hour >= 5 && hour < 12) {
-      setGreeting("Good Morning");
-    } else if (hour >= 12 && hour < 17) {
-      setGreeting("Good Afternoon");
-    } else {
-      setGreeting("Good Evening");
-    }
-  }, []);
+  const greeting = getGreeting();
 
   // Don't show header on login page
   if (pathname === "/login") {
     return null;
   }
 
-  if (!mounted || loading) {
+  if (loading) {
     return (
       <header className="w-full bg-[var(--color-bloom-rose-50)] border-b border-[var(--color-bloom-rose-100)] px-4 py-3">
         <div className="flex items-center justify-between">
