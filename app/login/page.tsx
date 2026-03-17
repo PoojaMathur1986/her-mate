@@ -9,6 +9,7 @@ import {
   signInWithPopup
 } from "firebase/auth";
 import { useAuth } from "@/app/lib/AuthContext";
+import { checkMoodForCurrentSlot } from "@/app/lib/moodClient";
 
 export default function LoginPage() {
   const { user, loading } = useAuth();
@@ -18,7 +19,25 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push("/");
+      const redirectUser = async () => {
+        try {
+          // Check if user has logged mood for current slot
+          const result = await checkMoodForCurrentSlot();
+          if (result.success && result.data?.exists) {
+            // Mood exists, go to home
+            router.push("/");
+          } else {
+            // No mood yet, go to mood page
+            router.push("/mood");
+          }
+        } catch (err) {
+          // On error, default to home
+          console.error("Failed to check mood:", err);
+          router.push("/");
+        }
+      };
+
+      redirectUser();
     }
   }, [user, loading, router]);
 
@@ -28,7 +47,13 @@ export default function LoginPage() {
     try {
       const provider = new GoogleAuthProvider();
       await signInWithPopup(auth, provider);
-      router.push("/");
+      // Check mood and redirect accordingly
+      const result = await checkMoodForCurrentSlot();
+      if (result.success && result.data?.exists) {
+        router.push("/");
+      } else {
+        router.push("/mood");
+      }
     } catch (err) {
       setError((err as Error)?.message || "Failed to sign in with Google");
     } finally {
@@ -44,7 +69,13 @@ export default function LoginPage() {
       provider.addScope("email");
       provider.addScope("public_profile");
       await signInWithPopup(auth, provider);
-      router.push("/");
+      // Check mood and redirect accordingly
+      const result = await checkMoodForCurrentSlot();
+      if (result.success && result.data?.exists) {
+        router.push("/");
+      } else {
+        router.push("/mood");
+      }
     } catch (err) {
       setError((err as Error)?.message || "Failed to sign in with Facebook");
     } finally {
