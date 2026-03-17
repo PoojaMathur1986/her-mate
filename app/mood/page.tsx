@@ -3,10 +3,11 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
+import { getCurrentSlot, type DaySlot } from "@/app/lib/slots";
 import {
   saveMoodLog,
   checkMoodForCurrentSlot,
-  updateMoodNote
+  updateMoodNote,
 } from "@/app/lib/moodClient";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -51,7 +52,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(223,176,48,0.30)",
     textColor: "#78520D",
     noteBg: "#FDF8EE",
-    notePlaceholder: "What's making you happy today? ☀️"
+    notePlaceholder: "What's making you happy today? ☀️",
   },
   {
     key: "calm",
@@ -63,7 +64,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(82,168,130,0.28)",
     textColor: "#1C543B",
     noteBg: "#EEF7F2",
-    notePlaceholder: "What's helping you feel grounded? 🌿"
+    notePlaceholder: "What's helping you feel grounded? 🌿",
   },
   {
     key: "excited",
@@ -75,7 +76,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(224,123,74,0.30)",
     textColor: "#8B4513",
     noteBg: "#FDF0EB",
-    notePlaceholder: "What's got you excited? 🎉"
+    notePlaceholder: "What's got you excited? 🎉",
   },
   {
     key: "loved",
@@ -87,7 +88,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(255,107,157,0.28)",
     textColor: "#C2185B",
     noteBg: "#FFF5FA",
-    notePlaceholder: "What makes you feel valued? 💕"
+    notePlaceholder: "What makes you feel valued? 💕",
   },
   {
     key: "meh",
@@ -99,7 +100,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(229,168,130,0.28)",
     textColor: "#8F4530",
     noteBg: "#FDF6F0",
-    notePlaceholder: "Anything on your mind? No pressure… 💭"
+    notePlaceholder: "Anything on your mind? No pressure… 💭",
   },
   {
     key: "tired",
@@ -111,7 +112,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(189,168,180,0.28)",
     textColor: "#4D3346",
     noteBg: "#F4EFF2",
-    notePlaceholder: "What's been draining you lately? 🌙"
+    notePlaceholder: "What's been draining you lately? 🌙",
   },
   {
     key: "anxious",
@@ -123,7 +124,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(184,119,220,0.25)",
     textColor: "#612E85",
     noteBg: "#F8F0FB",
-    notePlaceholder: "What's making you feel unsettled? 💜"
+    notePlaceholder: "What's making you feel unsettled? 💜",
   },
   {
     key: "frustrated",
@@ -135,7 +136,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(212,132,90,0.28)",
     textColor: "#663020",
     noteBg: "#FDF6F0",
-    notePlaceholder: "What's getting in your way? Let it out 🔥"
+    notePlaceholder: "What's getting in your way? Let it out 🔥",
   },
   {
     key: "sad",
@@ -147,7 +148,7 @@ const MOODS: Mood[] = [
     glowColor: "rgba(150,122,136,0.25)",
     textColor: "#3D2535",
     noteBg: "#F4EFF2",
-    notePlaceholder: "What's weighing on your heart? 🫂"
+    notePlaceholder: "What's weighing on your heart? 🫂",
   },
   {
     key: "angry",
@@ -159,9 +160,24 @@ const MOODS: Mood[] = [
     glowColor: "rgba(184,57,104,0.25)",
     textColor: "#6B1E3D",
     noteBg: "#FDF2F6",
-    notePlaceholder: "Safe to say it here — what happened? 💢"
-  }
+    notePlaceholder: "Safe to say it here — what happened? 💢",
+  },
 ];
+
+// ─── Slot Messages ────────────────────────────────────────────────────────────
+
+const SLOT_MESSAGES: Record<DaySlot, { prompt: string; emoji: string }> = {
+  morning: { prompt: "Rise and shine! 🌅", emoji: "☀️" },
+  afternoon: { prompt: "Time for your afternoon check-in 🌤️", emoji: "💫" },
+  evening: { prompt: "How's your evening going? ✨", emoji: "🌙" },
+  night: { prompt: "Late night vibes... 🌙", emoji: "💤" },
+};
+
+function getSlotMessage(): string {
+  const slot = getCurrentSlot();
+  const message = SLOT_MESSAGES[slot];
+  return message.prompt;
+}
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -175,7 +191,7 @@ function useLongPress(
   onComplete: () => void,
   onProgress: (p: number) => void,
   onCancel: () => void,
-  duration = HOLD_DURATION
+  duration = HOLD_DURATION,
 ) {
   const rafRef = useRef<number | null>(null);
   const startRef = useRef<number | null>(null);
@@ -189,7 +205,7 @@ function useLongPress(
       if (!activeRef.current) return;
       const progress = Math.min(
         (now - (startRef.current ?? now)) / duration,
-        1
+        1,
       );
       onProgress(progress);
       if (progress >= 1) {
@@ -215,7 +231,7 @@ function useLongPress(
       activeRef.current = false;
       if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
     },
-    []
+    [],
   );
 
   return { start, cancel };
@@ -229,7 +245,7 @@ function MoodButton({
   isAnyActive,
   progress,
   onStart,
-  onEnd
+  onEnd,
 }: {
   mood: Mood;
   isActive: boolean;
@@ -247,7 +263,7 @@ function MoodButton({
       className="flex flex-col items-center gap-1.5 select-none"
       style={{
         opacity: dimmed ? 0.3 : 1,
-        transition: "opacity 0.2s ease"
+        transition: "opacity 0.2s ease",
       }}
     >
       {/* Press target */}
@@ -271,7 +287,7 @@ function MoodButton({
               background: mood.glowColor,
               transform: `scale(${1 + progress * 0.18})`,
               transition: "transform 0.08s",
-              borderRadius: "50%"
+              borderRadius: "50%",
             }}
           />
         )}
@@ -318,7 +334,7 @@ function MoodButton({
             transition: "transform 0.08s ease",
             filter: isHolding
               ? `drop-shadow(0 0 ${10 * progress}px ${mood.glowColor})`
-              : "none"
+              : "none",
           }}
         >
           {mood.emoji}
@@ -330,7 +346,7 @@ function MoodButton({
         className="text-[11px] font-medium text-center leading-tight"
         style={{
           color: isActive ? mood.textColor : "var(--color-text-secondary)",
-          transition: "color 0.2s"
+          transition: "color 0.2s",
         }}
       >
         {mood.label}
@@ -344,7 +360,7 @@ function MoodButton({
 function NoteSheet({
   mood,
   onSave,
-  onSkip
+  onSkip,
 }: {
   mood: Mood;
   onSave: (note: string) => void;
@@ -393,14 +409,14 @@ function NoteSheet({
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(10px)",
-          transition: "opacity 0.3s ease, transform 0.3s ease"
+          transition: "opacity 0.3s ease, transform 0.3s ease",
         }}
       >
         <span
           className="leading-none mb-5 noto-color-emoji"
           style={{
             fontSize: 72,
-            filter: `drop-shadow(0 6px 24px ${mood.glowColor})`
+            filter: `drop-shadow(0 6px 24px ${mood.glowColor})`,
           }}
         >
           {mood.emoji}
@@ -428,7 +444,7 @@ function NoteSheet({
           boxShadow: "0 -4px 40px rgba(61,37,53,0.09)",
           paddingBottom: "max(2rem, env(safe-area-inset-bottom, 2rem))",
           transform: visible ? "translateY(0)" : "translateY(72px)",
-          transition: "transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)"
+          transition: "transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
         {/* Drag handle */}
@@ -451,7 +467,7 @@ function NoteSheet({
             borderColor: "var(--color-border-soft)",
             color: "var(--color-text-primary)",
             caretColor: mood.ringColor,
-            transition: "border-color 0.15s, box-shadow 0.15s"
+            transition: "border-color 0.15s, box-shadow 0.15s",
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = mood.ringColor;
@@ -479,7 +495,7 @@ function NoteSheet({
             style={{
               borderColor: "var(--color-border-medium)",
               color: "var(--color-text-secondary)",
-              background: "rgba(255,255,255,0.5)"
+              background: "rgba(255,255,255,0.5)",
             }}
           >
             Skip
@@ -489,7 +505,7 @@ function NoteSheet({
             className="flex-[2] py-3 rounded-full text-[14px] font-medium text-white active:scale-[0.97] transition-transform"
             style={{
               background: mood.ringColor,
-              boxShadow: `0 4px 18px ${mood.glowColor}`
+              boxShadow: `0 4px 18px ${mood.glowColor}`,
             }}
           >
             Save mood
@@ -506,7 +522,7 @@ function ViewMoodSheet({
   mood,
   initialNote,
   onSave,
-  onClose
+  onClose,
 }: {
   mood: Mood;
   initialNote: string;
@@ -556,14 +572,14 @@ function ViewMoodSheet({
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(10px)",
-          transition: "opacity 0.3s ease, transform 0.3s ease"
+          transition: "opacity 0.3s ease, transform 0.3s ease",
         }}
       >
         <span
           className="leading-none mb-5 noto-color-emoji"
           style={{
             fontSize: 72,
-            filter: `drop-shadow(0 6px 24px ${mood.glowColor})`
+            filter: `drop-shadow(0 6px 24px ${mood.glowColor})`,
           }}
         >
           {mood.emoji}
@@ -597,7 +613,7 @@ function ViewMoodSheet({
           boxShadow: "0 -4px 40px rgba(61,37,53,0.09)",
           paddingBottom: "max(2rem, env(safe-area-inset-bottom, 2rem))",
           transform: visible ? "translateY(0)" : "translateY(72px)",
-          transition: "transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)"
+          transition: "transform 0.38s cubic-bezier(0.32, 0.72, 0, 1)",
         }}
       >
         {/* Drag handle */}
@@ -620,7 +636,7 @@ function ViewMoodSheet({
             borderColor: "var(--color-border-soft)",
             color: "var(--color-text-primary)",
             caretColor: mood.ringColor,
-            transition: "border-color 0.15s, box-shadow 0.15s"
+            transition: "border-color 0.15s, box-shadow 0.15s",
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = mood.ringColor;
@@ -648,7 +664,7 @@ function ViewMoodSheet({
             style={{
               borderColor: "var(--color-border-medium)",
               color: "var(--color-text-secondary)",
-              background: "rgba(255,255,255,0.5)"
+              background: "rgba(255,255,255,0.5)",
             }}
           >
             Cancel
@@ -658,7 +674,7 @@ function ViewMoodSheet({
             className="flex-[2] py-3 rounded-full text-[14px] font-medium text-white active:scale-[0.97] transition-transform"
             style={{
               background: mood.ringColor,
-              boxShadow: `0 4px 18px ${mood.glowColor}`
+              boxShadow: `0 4px 18px ${mood.glowColor}`,
             }}
           >
             Update note
@@ -685,7 +701,7 @@ function DoneView({ mood, hasNote }: { mood: Mood; hasNote: boolean }) {
       style={{
         background: mood.pageBg,
         opacity: visible ? 1 : 0,
-        transition: "opacity 0.35s ease"
+        transition: "opacity 0.35s ease",
       }}
     >
       <span
@@ -694,7 +710,7 @@ function DoneView({ mood, hasNote }: { mood: Mood; hasNote: boolean }) {
           fontSize: 80,
           filter: `drop-shadow(0 6px 28px ${mood.glowColor})`,
           transform: visible ? "scale(1)" : "scale(0.65)",
-          transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)"
+          transition: "transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1)",
         }}
       >
         {mood.emoji}
@@ -797,7 +813,7 @@ function MoodPageContent() {
     anxious: useLongPress(handleComplete, handleProgress, handleCancel),
     frustrated: useLongPress(handleComplete, handleProgress, handleCancel),
     sad: useLongPress(handleComplete, handleProgress, handleCancel),
-    angry: useLongPress(handleComplete, handleProgress, handleCancel)
+    angry: useLongPress(handleComplete, handleProgress, handleCancel),
   } as const;
 
   function startPress(key: MoodKey) {
@@ -823,7 +839,7 @@ function MoodPageContent() {
       // Call API to save mood
       await saveMoodLog({
         mood: pendingMood.key,
-        note: note.trim() || ""
+        note: note.trim() || "",
       });
 
       const hasNote = note.length > 0;
@@ -874,11 +890,11 @@ function MoodPageContent() {
 
   // ── Mood categories ──
   const positiveRow = MOODS.filter((m) =>
-    ["happy", "calm", "excited", "loved"].includes(m.key)
+    ["happy", "calm", "excited", "loved"].includes(m.key),
   );
   const neutralRow = MOODS.filter((m) => ["meh", "tired"].includes(m.key));
   const challengingRow = MOODS.filter((m) =>
-    ["anxious", "frustrated", "sad", "angry"].includes(m.key)
+    ["anxious", "frustrated", "sad", "angry"].includes(m.key),
   );
 
   return (
@@ -923,7 +939,7 @@ function MoodPageContent() {
             background: activeMoodObj
               ? activeMoodObj.pageBg
               : "linear-gradient(160deg, var(--color-bloom-blush-100) 0%, var(--color-bloom-rose-50) 100%)",
-            transition: "background 0.45s ease"
+            transition: "background 0.45s ease",
           }}
         >
           {/* Top bar */}
@@ -941,12 +957,24 @@ function MoodPageContent() {
 
           {/* Heading */}
           <div className="px-6 pt-6 pb-4 text-center">
+            {/* Slot-based message */}
+            <p
+              className="text-[12px] font-semibold uppercase tracking-widest mb-3 transition-colors duration-300"
+              style={{
+                color: activeMoodObj
+                  ? activeMoodObj.textColor
+                  : "var(--color-bloom-rose-500)",
+              }}
+            >
+              {getSlotMessage()}
+            </p>
+
             <h1
               className="font-[family-name:var(--font-display)] text-[1.55rem] font-normal leading-snug transition-colors duration-400"
               style={{
                 color: activeMoodObj
                   ? activeMoodObj.textColor
-                  : "var(--color-bloom-midnight-600)"
+                  : "var(--color-bloom-midnight-600)",
               }}
             >
               How are you{" "}
@@ -965,7 +993,7 @@ function MoodPageContent() {
                 color: activeMoodObj
                   ? activeMoodObj.textColor
                   : "var(--color-text-muted)",
-                opacity: 0.8
+                opacity: 0.8,
               }}
             >
               {activeMood && holdProgress > 0
@@ -1052,7 +1080,7 @@ function MoodPageContent() {
               className="text-[11px] font-medium tracking-wide transition-opacity duration-200"
               style={{
                 color: "var(--color-text-muted)",
-                opacity: activeMood ? 0 : 1
+                opacity: activeMood ? 0 : 1,
               }}
             >
               Your feelings are private and safe here 🔒

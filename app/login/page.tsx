@@ -6,7 +6,7 @@ import { auth } from "@/app/lib/firebase";
 import {
   GoogleAuthProvider,
   FacebookAuthProvider,
-  signInWithPopup
+  signInWithPopup,
 } from "firebase/auth";
 import { useAuth } from "@/app/lib/AuthContext";
 import { checkMoodForCurrentSlot } from "@/app/lib/moodClient";
@@ -85,14 +85,16 @@ export default function LoginPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-slate-800">
-        <div className="text-white text-lg">Loading...</div>
+      <div className="flex items-center justify-center min-h-screen bg-[var(--color-bg-page)]">
+        <div className="text-[var(--color-text-primary)] text-lg">
+          Loading...
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 to-slate-800 px-4">
+    <div className="flex items-center justify-center min-h-screen bg-[var(--color-bg-page)] px-4">
       <div className="w-full max-w-md">
         <div className="bg-white rounded-lg shadow-xl p-8">
           <div className="text-center mb-8">
