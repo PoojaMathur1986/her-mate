@@ -70,29 +70,50 @@ export function getMoodDisplay(moodType: string): MoodDisplay {
 }
 
 /**
- * Format a date to a readable string
+ * Format a date to a readable string with proper timezone handling
+ * Compares local date boundaries to determine day offset
  */
 export function formatMoodDate(dateStr: string): string {
     const date = new Date(dateStr);
     const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) {
-        // Same day - show time
-        return date.toLocaleTimeString("en-US", {
-            hour: "numeric",
-            minute: "2-digit",
-            hour12: true,
-        });
-    } else if (diffDays === 1) {
-        return "Yesterday";
-    } else if (diffDays < 7) {
-        return `${diffDays} days ago`;
+    // Get local date components (year, month, day)
+    const dateYear = date.getFullYear();
+    const dateMonth = date.getMonth();
+    const dateDay = date.getDate();
+
+    const nowYear = now.getFullYear();
+    const nowMonth = now.getMonth();
+    const nowDay = now.getDate();
+
+    // Calculate day difference using local date boundaries
+    const isSameDay = dateYear === nowYear && dateMonth === nowMonth && dateDay === nowDay;
+    const isYesterday =
+        dateYear === nowYear &&
+        dateMonth === nowMonth &&
+        dateDay === nowDay - 1;
+    const daysDiff = Math.floor(
+        (now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    // Format time
+    const timeStr = date.toLocaleTimeString("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+    });
+
+    if (isSameDay) {
+        return `Today at ${timeStr}`;
+    } else if (isYesterday) {
+        return `Yesterday at ${timeStr}`;
+    } else if (daysDiff < 7) {
+        return `${daysDiff} days ago at ${timeStr}`;
     } else {
-        return date.toLocaleDateString("en-US", {
+        const dateStr = date.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
         });
+        return `${dateStr} at ${timeStr}`;
     }
 }
