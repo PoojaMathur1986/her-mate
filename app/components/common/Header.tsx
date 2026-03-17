@@ -3,9 +3,11 @@
 import { useAuth } from "@/app/lib/AuthContext";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 
 export function Header() {
   const { user, loading } = useAuth();
+  const pathname = usePathname();
   const [greeting, setGreeting] = useState<string>("");
   const [mounted, setMounted] = useState(false);
 
@@ -24,6 +26,11 @@ export function Header() {
       setGreeting("Good Evening");
     }
   }, []);
+
+  // Don't show header on login page
+  if (pathname === "/login") {
+    return null;
+  }
 
   if (!mounted || loading) {
     return (
