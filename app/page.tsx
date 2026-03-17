@@ -1,9 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
 import { useAuth } from "@/app/lib/AuthContext";
 import { BottomNav } from "@/app/components/common/BottomNav";
+import {
+  getMoodDisplay,
+  formatMoodDate,
+  type MoodDisplay
+} from "@/app/lib/moodUtils";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -32,7 +38,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Journal",
     sublabel: "Talk or write it out",
     tileClass: "tile-journal",
-    iconBg: "bg-[var(--color-bloom-petal-200)]",
+    iconBg: "bg-[var(--color-bloom-petal-200)]"
   },
   {
     href: "/safe-space",
@@ -40,7 +46,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Safe space",
     sublabel: "Vent, letters & wishes",
     tileClass: "tile-space",
-    iconBg: "bg-[var(--color-bloom-rose-200)]",
+    iconBg: "bg-[var(--color-bloom-rose-200)]"
   },
   {
     href: "/breathe",
@@ -48,7 +54,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Breathe",
     sublabel: "Calm in 2 minutes",
     tileClass: "tile-breathe",
-    iconBg: "bg-[var(--color-bloom-sage-200)]",
+    iconBg: "bg-[var(--color-bloom-sage-200)]"
   },
   {
     href: "/memories",
@@ -56,8 +62,8 @@ const QUICK_TILES: QuickTile[] = [
     label: "Memories",
     sublabel: "My favourite moments",
     tileClass: "tile-memories",
-    iconBg: "bg-[var(--color-bloom-honey-200)]",
-  },
+    iconBg: "bg-[var(--color-bloom-honey-200)]"
+  }
 ];
 
 const RECENT_MEMORIES: MemoryEntry[] = [
@@ -65,14 +71,14 @@ const RECENT_MEMORIES: MemoryEntry[] = [
     id: "1",
     emoji: "☕",
     text: "That first sip of chai in the garden — pure peace.",
-    date: "Yesterday",
+    date: "Yesterday"
   },
   {
     id: "2",
     emoji: "🌅",
     text: "The sky turned the most beautiful shade of pink this morning.",
-    date: "2 days ago",
-  },
+    date: "2 days ago"
+  }
 ];
 
 // ─── Subcomponents ───────────────────────────────────────────────────────────
@@ -156,14 +162,49 @@ function StreakBadge({ count }: { count: number }) {
 // ─── Page ────────────────────────────────────────────────────────────────────
 
 function HomePageContent() {
+  const { user } = useAuth();
   const streakDays = 7;
-  // TODO: Get last captured mood from database or localStorage
-  const lastMood = {
-    emoji: "🌿",
-    label: "Okay",
-    textColor: "text-[var(--color-bloom-sage-700)]",
-  };
-  const lastMoodDate = "Today at 11:30 AM";
+
+  const [lastMood, setLastMood] = useState<
+    (MoodDisplay & { createdAt: string }) | null
+  >(null);
+  const [isLoadingMood, setIsLoadingMood] = useState(true);
+
+  // Fetch last captured mood on component mount
+  useEffect(() => {
+    const fetchLastMood = async () => {
+      if (!user) {
+        setIsLoadingMood(false);
+        return;
+      }
+
+      try {
+        const idToken = await user.getIdToken();
+        const response = await fetch("/api/mood/last", {
+          headers: {
+            Authorization: `Bearer ${idToken}`
+          }
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.success && data.data) {
+            const display = getMoodDisplay(data.data.mood);
+            setLastMood({
+              ...display,
+              createdAt: data.data.createdAt
+            });
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch last mood:", error);
+      } finally {
+        setIsLoadingMood(false);
+      }
+    };
+
+    fetchLastMood();
+  }, [user]);
 
   return (
     <div className="min-h-dvh bg-[var(--color-bg-page)] font-[family-name:var(--font-body)]">
@@ -179,22 +220,45 @@ function HomePageContent() {
               <p className="text-[13px] text-[var(--color-text-secondary)] mb-2 font-[family-name:var(--font-display)] italic">
                 How you&apos;re feeling
               </p>
-              <div className="flex items-center gap-2.5">
-                <span className="text-2xl noto-color-emoji">
-                  {lastMood.emoji}
-                </span>
-                <div>
-                  <p className={`font-medium text-sm ${lastMood.textColor}`}>
-                    {lastMood.label}
+              {isLoadingMood ? (
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 bg-[var(--color-border-soft)] rounded-full animate-pulse" />
+                  <div className="space-y-1">
+                    <div className="w-20 h-4 bg-[var(--color-border-soft)] rounded animate-pulse" />
+                    <div className="w-24 h-3 bg-[var(--color-border-soft)] rounded animate-pulse" />
+                  </div>
+                </div>
+              ) : lastMood ? (
+                <>
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-2xl noto-color-emoji">
+                      {lastMood.emoji}
+                    </span>
+                    <div>
+                      <p
+                        className={`font-medium text-sm ${lastMood.textColor}`}
+                      >
+                        {lastMood.label}
+                      </p>
+                      <p className="text-[11px] text-[var(--color-text-muted)]">
+                        {formatMoodDate(lastMood.createdAt)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="mt-3">
+                    <StreakBadge count={streakDays} />
+                  </div>
+                </>
+              ) : (
+                <div className="space-y-2">
+                  <p className="text-sm text-[var(--color-text-muted)]">
+                    No mood logged yet
                   </p>
-                  <p className="text-[11px] text-[var(--color-text-muted)]">
-                    {lastMoodDate}
+                  <p className="text-[12px] text-[var(--color-text-brand)] font-medium">
+                    Log your first mood →
                   </p>
                 </div>
-              </div>
-              <div className="mt-3">
-                <StreakBadge count={streakDays} />
-              </div>
+              )}
             </div>
             <span className="text-[var(--color-text-brand)] text-lg">→</span>
           </Link>
@@ -221,7 +285,7 @@ function HomePageContent() {
             className="rounded-2xl px-4 py-4 border border-[var(--color-border-soft)]"
             style={{
               background:
-                "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))",
+                "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))"
             }}
           >
             <p className="section-label mb-2">Today&apos;s gentle prompt</p>
