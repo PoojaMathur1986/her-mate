@@ -1,13 +1,14 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { BottomNav } from "@/app/components/common/BottomNav";
+
+import { LoadingSpinner } from "@/app/components/common/LoadingSpinner";
 import { Button, Textarea } from "@/app/components/ui";
 import {
   fetchJournalEntries,
   createJournalEntry,
   updateJournalEntry,
-  deleteJournalEntry
+  deleteJournalEntry,
 } from "@/app/lib/journalClient";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -42,7 +43,7 @@ const EMOJI_STICKERS = [
   "🌷",
   "🌟",
   "💕",
-  "🌼"
+  "🌼",
 ];
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -61,7 +62,7 @@ function formatDayLabel(dateKey: string): string {
   return date.toLocaleDateString([], {
     weekday: "short",
     month: "short",
-    day: "numeric"
+    day: "numeric",
   });
 }
 
@@ -84,7 +85,7 @@ function getLast28Days(): {
       dateKey: toDateKey(d),
       dayNum: d.getDate(),
       dayName: d.toLocaleDateString([], { weekday: "short" }),
-      monthName: d.toLocaleDateString([], { month: "short" })
+      monthName: d.toLocaleDateString([], { month: "short" }),
     });
   }
   return days;
@@ -95,7 +96,7 @@ function getLast28Days(): {
 function EmojiPicker({
   selected,
   onSelect,
-  onClose
+  onClose,
 }: {
   selected: string;
   onSelect: (e: string) => void;
@@ -142,7 +143,7 @@ function EntryCard({
   entry,
   sealed,
   onEdit,
-  onDelete
+  onDelete,
 }: {
   entry: JournalEntry;
   sealed: boolean;
@@ -274,7 +275,7 @@ function EntryCard({
 }
 
 function NewEntryComposer({
-  onSave
+  onSave,
 }: {
   onSave: (text: string, emoji: string) => void;
 }) {
@@ -298,7 +299,7 @@ function NewEntryComposer({
       style={{
         background:
           "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))",
-        border: "0.5px solid var(--color-border-soft)"
+        border: "0.5px solid var(--color-border-soft)",
       }}
     >
       {!expanded ? (
@@ -372,7 +373,7 @@ function DaySection({
   dateKey,
   entries,
   onEdit,
-  onDelete
+  onDelete,
 }: {
   dateKey: string;
   entries: JournalEntry[];
@@ -416,7 +417,7 @@ function WeekStrip({
   days,
   entryCountByDate,
   selectedDateKey,
-  onSelect
+  onSelect,
 }: {
   days: ReturnType<typeof getLast28Days>;
   entryCountByDate: Record<string, number>;
@@ -500,7 +501,7 @@ function WeekStrip({
 export default function JournalPage() {
   const [selectedEntries, setSelectedEntries] = useState<JournalEntry[]>([]);
   const [selectedDateKey, setSelectedDateKey] = useState<string>(
-    toDateKey(new Date())
+    toDateKey(new Date()),
   );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -521,7 +522,7 @@ export default function JournalPage() {
           text: e.text,
           emoji: e.emoji,
           timestamp: new Date(e.timestamp),
-          dateKey: selectedDateKey
+          dateKey: selectedDateKey,
         }));
         setSelectedEntries(transformedEntries);
 
@@ -533,7 +534,7 @@ export default function JournalPage() {
       } catch (err) {
         console.error("Failed to fetch entries:", err);
         setError(
-          err instanceof Error ? err.message : "Failed to fetch entries"
+          err instanceof Error ? err.message : "Failed to fetch entries",
         );
         setSelectedEntries([]);
       } finally {
@@ -551,7 +552,7 @@ export default function JournalPage() {
       acc[e.dateKey] = (acc[e.dateKey] ?? 0) + 1;
       return acc;
     },
-    {}
+    {},
   );
 
   async function addEntry(text: string, emoji: string) {
@@ -563,7 +564,7 @@ export default function JournalPage() {
         text: newEntry.text,
         emoji: newEntry.emoji,
         timestamp: new Date(newEntry.timestamp),
-        dateKey: toDateKey(new Date())
+        dateKey: toDateKey(new Date()),
       };
       setSelectedEntries((prev) => [...prev, entry]);
       setAllEntries((prev) => [...prev, entry]);
@@ -583,7 +584,7 @@ export default function JournalPage() {
         text: updated.text,
         emoji: updated.emoji,
         timestamp: new Date(updated.timestamp),
-        dateKey: selectedDateKey
+        dateKey: selectedDateKey,
       };
       setSelectedEntries((prev) => prev.map((e) => (e.id === id ? entry : e)));
       setAllEntries((prev) => prev.map((e) => (e.id === id ? entry : e)));
@@ -616,7 +617,7 @@ export default function JournalPage() {
           className="px-5 py-3 relative overflow-hidden"
           style={{
             background:
-              "linear-gradient(160deg, var(--color-bloom-petal-50) 0%, var(--color-bloom-rose-50) 100%)"
+              "linear-gradient(160deg, var(--color-bloom-petal-50) 0%, var(--color-bloom-rose-50) 100%)",
           }}
         >
           <div
@@ -624,7 +625,7 @@ export default function JournalPage() {
             className="absolute -top-8 -right-8 w-36 h-36 rounded-full opacity-15 pointer-events-none"
             style={{
               background:
-                "radial-gradient(circle, var(--color-bloom-petal-300), transparent 70%)"
+                "radial-gradient(circle, var(--color-bloom-petal-300), transparent 70%)",
             }}
           />
           <div className="relative">
@@ -674,12 +675,11 @@ export default function JournalPage() {
         {/* ── Entries for selected day ── */}
         <section className="mt-5 px-4" aria-label="Journal entries">
           {loading ? (
-            <div className="flex flex-col items-center gap-2 py-10 text-center">
-              <span className="text-2xl animate-pulse">✨</span>
-              <p className="text-[13px] text-[var(--color-text-muted)] font-[family-name:var(--font-display)] italic">
-                Loading your pages...
-              </p>
-            </div>
+            <LoadingSpinner
+              message="Loading your pages..."
+              variant="bloom"
+              size="md"
+            />
           ) : selectedEntries.length > 0 ? (
             <DaySection
               dateKey={selectedDateKey}
@@ -711,8 +711,6 @@ export default function JournalPage() {
           </div>
         )}
       </div>
-
-      <BottomNav activeHref="/journal" />
     </div>
   );
 }
