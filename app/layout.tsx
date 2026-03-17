@@ -4,6 +4,7 @@ import { Lora, DM_Sans } from "next/font/google";
 import "./globals.css";
 import { AuthProvider } from "./lib/AuthContext";
 import { Header } from "./components/common/Header";
+import { BottomNavWrapper } from "./components/common/BottomNavWrapper";
 import { PWARegister } from "./lib/PWARegister";
 
 const lora = Lora({ subsets: ["latin"], variable: "--font-display" });
@@ -60,6 +61,7 @@ export default function RootLayout({
         <AuthProvider>
           <Header />
           {children}
+          <BottomNavWrapper />
         </AuthProvider>
       </body>
     </html>

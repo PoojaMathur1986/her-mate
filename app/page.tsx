@@ -4,11 +4,10 @@ import Link from "next/link";
 import { useState, useEffect } from "react";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
 import { useAuth } from "@/app/lib/AuthContext";
-import { BottomNav } from "@/app/components/common/BottomNav";
 import {
   getMoodDisplay,
   formatMoodDate,
-  type MoodDisplay
+  type MoodDisplay,
 } from "@/app/lib/moodUtils";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
@@ -38,7 +37,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Journal",
     sublabel: "Talk or write it out",
     tileClass: "tile-journal",
-    iconBg: "bg-[var(--color-bloom-petal-200)]"
+    iconBg: "bg-[var(--color-bloom-petal-200)]",
   },
   {
     href: "/safe-space",
@@ -46,7 +45,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Safe space",
     sublabel: "Vent, letters & wishes",
     tileClass: "tile-space",
-    iconBg: "bg-[var(--color-bloom-rose-200)]"
+    iconBg: "bg-[var(--color-bloom-rose-200)]",
   },
   {
     href: "/breathe",
@@ -54,7 +53,7 @@ const QUICK_TILES: QuickTile[] = [
     label: "Breathe",
     sublabel: "Calm in 2 minutes",
     tileClass: "tile-breathe",
-    iconBg: "bg-[var(--color-bloom-sage-200)]"
+    iconBg: "bg-[var(--color-bloom-sage-200)]",
   },
   {
     href: "/memories",
@@ -62,8 +61,8 @@ const QUICK_TILES: QuickTile[] = [
     label: "Memories",
     sublabel: "My favourite moments",
     tileClass: "tile-memories",
-    iconBg: "bg-[var(--color-bloom-honey-200)]"
-  }
+    iconBg: "bg-[var(--color-bloom-honey-200)]",
+  },
 ];
 
 const RECENT_MEMORIES: MemoryEntry[] = [
@@ -71,14 +70,14 @@ const RECENT_MEMORIES: MemoryEntry[] = [
     id: "1",
     emoji: "☕",
     text: "That first sip of chai in the garden — pure peace.",
-    date: "Yesterday"
+    date: "Yesterday",
   },
   {
     id: "2",
     emoji: "🌅",
     text: "The sky turned the most beautiful shade of pink this morning.",
-    date: "2 days ago"
-  }
+    date: "2 days ago",
+  },
 ];
 
 // ─── Subcomponents ───────────────────────────────────────────────────────────
@@ -170,8 +169,8 @@ function HomePageContent() {
         const idToken = await user.getIdToken();
         const response = await fetch("/api/mood/last", {
           headers: {
-            Authorization: `Bearer ${idToken}`
-          }
+            Authorization: `Bearer ${idToken}`,
+          },
         });
 
         if (response.ok) {
@@ -181,7 +180,7 @@ function HomePageContent() {
             const display = getMoodDisplay(data.data.mood);
             setLastMood({
               ...display,
-              createdAt: data.data.createdAt
+              createdAt: data.data.createdAt,
             });
             console.log("✅ Mood set:", display);
           }
@@ -275,7 +274,7 @@ function HomePageContent() {
             className="rounded-2xl px-4 py-4 border border-[var(--color-border-soft)]"
             style={{
               background:
-                "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))"
+                "linear-gradient(135deg, var(--color-bloom-petal-50), var(--color-bloom-rose-50))",
             }}
           >
             <p className="section-label mb-2">Today&apos;s gentle prompt</p>
@@ -339,9 +338,6 @@ function HomePageContent() {
         </section>
       </div>
       {/* end scroll container */}
-
-      {/* ── Bottom navigation ── */}
-      <BottomNav activeHref="/" />
     </div>
   );
 }

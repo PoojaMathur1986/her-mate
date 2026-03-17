@@ -5,7 +5,6 @@ import { signOut } from "firebase/auth";
 import { auth } from "@/app/lib/firebase";
 import { useAuth } from "@/app/lib/AuthContext";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
-import { BottomNav } from "@/app/components/common/BottomNav";
 
 // ─── Types ───────────────────────────────────────────────────────────────────
 
@@ -351,8 +350,6 @@ function ProfilePageContent() {
             bloom
           </p>
         </div>
-
-        <BottomNav activeHref="/profile" />
       </div>
 
       {/* ── Logout confirmation bottom sheet ── */}

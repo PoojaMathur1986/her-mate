@@ -3,6 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { ProtectedRoute } from "@/app/lib/ProtectedRoute";
+import { Button, Textarea } from "@/app/components/ui";
 import { getCurrentSlot, type DaySlot } from "@/app/lib/slots";
 import {
   saveMoodLog,
@@ -395,17 +396,18 @@ function NoteSheet({
       style={{ background: mood.pageBg }}
     >
       {/* Back / cancel button */}
-      <button
+      <Button
         onClick={handleSkip}
-        className="absolute top-12 left-5 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-sm border border-[var(--color-border-soft)] text-[var(--color-text-secondary)] active:scale-95 transition-transform"
+        variant="secondary"
+        className="absolute top-12 left-5 z-10 w-9 h-9 p-0 flex items-center justify-center rounded-full"
         aria-label="Back"
       >
         ←
-      </button>
+      </Button>
 
       {/* Top — mood identity */}
       <div
-        className="flex-1 flex flex-col items-center justify-end pb-8 px-6"
+        className="flex flex-col items-center justify-center py-8 px-6"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(10px)",
@@ -454,20 +456,16 @@ function NoteSheet({
         <p className="section-label">Want to say more about it?</p>
 
         {/* Textarea */}
-        <textarea
+        <Textarea
           ref={textareaRef}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder={mood.notePlaceholder}
           maxLength={280}
           rows={4}
-          className="w-full resize-none rounded-2xl px-4 py-3 text-[14px] leading-relaxed outline-none border font-[family-name:var(--font-display)] italic"
+          className="font-[family-name:var(--font-display)] italic"
           style={{
-            background: "rgba(255,255,255,0.72)",
-            borderColor: "var(--color-border-soft)",
-            color: "var(--color-text-primary)",
             caretColor: mood.ringColor,
-            transition: "border-color 0.15s, box-shadow 0.15s",
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = mood.ringColor;
@@ -489,27 +487,16 @@ function NoteSheet({
 
         {/* Buttons */}
         <div className="flex gap-3 mt-1">
-          <button
-            onClick={handleSkip}
-            className="flex-1 py-3 rounded-full border text-[14px] font-medium active:scale-[0.97] transition-transform"
-            style={{
-              borderColor: "var(--color-border-medium)",
-              color: "var(--color-text-secondary)",
-              background: "rgba(255,255,255,0.5)",
-            }}
-          >
+          <Button onClick={handleSkip} variant="secondary" className="flex-1">
             Skip
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSave}
-            className="flex-[2] py-3 rounded-full text-[14px] font-medium text-white active:scale-[0.97] transition-transform"
-            style={{
-              background: mood.ringColor,
-              boxShadow: `0 4px 18px ${mood.glowColor}`,
-            }}
+            className="flex-[2] text-white"
+            style={{ background: mood.ringColor }}
           >
             Save mood
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -558,17 +545,18 @@ function ViewMoodSheet({
       style={{ background: mood.pageBg }}
     >
       {/* Back button */}
-      <button
+      <Button
         onClick={handleClose}
-        className="absolute top-12 left-5 z-10 w-9 h-9 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-sm border border-[var(--color-border-soft)] text-[var(--color-text-secondary)] active:scale-95 transition-transform"
+        variant="secondary"
+        className="absolute top-12 left-5 z-10 w-9 h-9 p-0 flex items-center justify-center rounded-full"
         aria-label="Back"
       >
         ←
-      </button>
+      </Button>
 
       {/* Top — mood identity (read-only) */}
       <div
-        className="flex-1 flex flex-col items-center justify-end pb-8 px-6"
+        className="flex flex-col items-center justify-center py-8 px-6"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? "translateY(0)" : "translateY(10px)",
@@ -623,20 +611,16 @@ function ViewMoodSheet({
         <p className="section-label">Update your note</p>
 
         {/* Textarea */}
-        <textarea
+        <Textarea
           ref={textareaRef}
           value={note}
           onChange={(e) => setNote(e.target.value)}
           placeholder={mood.notePlaceholder}
           maxLength={280}
           rows={4}
-          className="w-full resize-none rounded-2xl px-4 py-3 text-[14px] leading-relaxed outline-none border font-[family-name:var(--font-display)] italic"
+          className="font-[family-name:var(--font-display)] italic"
           style={{
-            background: "rgba(255,255,255,0.72)",
-            borderColor: "var(--color-border-soft)",
-            color: "var(--color-text-primary)",
             caretColor: mood.ringColor,
-            transition: "border-color 0.15s, box-shadow 0.15s",
           }}
           onFocus={(e) => {
             e.currentTarget.style.borderColor = mood.ringColor;
@@ -658,27 +642,16 @@ function ViewMoodSheet({
 
         {/* Buttons */}
         <div className="flex gap-3 mt-1">
-          <button
-            onClick={handleClose}
-            className="flex-1 py-3 rounded-full border text-[14px] font-medium active:scale-[0.97] transition-transform"
-            style={{
-              borderColor: "var(--color-border-medium)",
-              color: "var(--color-text-secondary)",
-              background: "rgba(255,255,255,0.5)",
-            }}
-          >
+          <Button onClick={handleClose} variant="secondary" className="flex-1">
             Cancel
-          </button>
-          <button
+          </Button>
+          <Button
             onClick={handleSave}
-            className="flex-[2] py-3 rounded-full text-[14px] font-medium text-white active:scale-[0.97] transition-transform"
-            style={{
-              background: mood.ringColor,
-              boxShadow: `0 4px 18px ${mood.glowColor}`,
-            }}
+            className="flex-[2] text-white"
+            style={{ background: mood.ringColor }}
           >
             Update note
-          </button>
+          </Button>
         </div>
       </div>
     </div>
@@ -944,13 +917,14 @@ function MoodPageContent() {
         >
           {/* Top bar */}
           <div className="flex items-center justify-between px-5 pt-12 pb-0">
-            <button
+            <Button
               onClick={() => router.back()}
-              className="w-9 h-9 flex items-center justify-center rounded-full bg-white/50 backdrop-blur-sm border border-[var(--color-border-soft)] text-[var(--color-text-secondary)] active:scale-95 transition-transform"
+              variant="secondary"
+              className="w-9 h-9 p-0 flex items-center justify-center rounded-full"
               aria-label="Go back"
             >
               ←
-            </button>
+            </Button>
             <p className="section-label">{greeting}</p>
             <div className="w-9" aria-hidden />
           </div>
